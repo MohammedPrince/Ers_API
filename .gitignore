@@ -18,9 +18,6 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-/bootstrap
-bootstrap
-bootstrap/
 /storage
 storage
 storage/
