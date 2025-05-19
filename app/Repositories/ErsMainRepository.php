@@ -36,6 +36,8 @@ class ErsMainRepository
                     'message' => 'Authorized access',
                     'token' => $plainTextToken,
                 ];
+            } else {
+                return ['success' => false, 'code' => 401, 'message' => 'Unauthorized access',];
             }
         } else {
             return ['success' => false, 'code' => 401, 'message' => 'Unauthorized access',];
