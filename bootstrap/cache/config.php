@@ -99,7 +99,7 @@
       ),
       'api' => 
       array (
-        'driver' => 'token',
+        'driver' => 'sanctum',
         'provider' => 'users',
         'hash' => false,
       ),
