@@ -19,7 +19,7 @@ use App\Http\Controllers\Api\AuthController;
 Route::post('/login', [App\Http\Controllers\API\AuthController::class, 'login'])->middleware(['api', 'JsonRes']);
 
 //Protecting Routes
-Route::group(['middleware' => ['auth:sanctum']], function (){
+Route::group(['middleware' => ['auth:sanctum','JsonRes']], function (){
 
     Route::post('/inquiry', [App\Http\Controllers\ApiController::class, 'studentInquiry']);
     Route::post('/payment', [App\Http\Controllers\ApiController::class, 'studentPayment']);
