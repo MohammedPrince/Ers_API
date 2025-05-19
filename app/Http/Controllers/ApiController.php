@@ -6,6 +6,8 @@ use App\Services\ErsMainService;
 use App\Http\Requests\Api\StudentInquiryRequest;
 use App\Http\Requests\Api\StudentPaymentRequest;
 
+use Illuminate\Support\Facades\Http;
+
 class ApiController extends Controller
 {
 
@@ -59,5 +61,28 @@ class ApiController extends Controller
             ], $result['code'], );
         }
     }
+
+    public function fetchFromLive()
+    {
+        $response = Http::get('https://api.fu.edu.sd/api/getData');
+
+        if ($response->successful()) {
+            return response()->json($response->json());
+        }
+
+        return response()->json(['error' => 'Failed to fetch data'], 500);
+    }
+
+
+    public function getData()
+    {
+        $var = 'hello World !';
+        return response()->json([
+            'status' => 'success',
+            'code' => 200,
+            'message' => $var,
+        ], 200);
+    }
+
 }
 

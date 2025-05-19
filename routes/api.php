@@ -14,7 +14,7 @@ use App\Http\Controllers\Api\AuthController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
+Route::get('/getData', [App\Http\Controllers\ApiController::class, 'getData'])->middleware(['api', 'JsonRes']);
 //Public Routes
 Route::post('/login', [App\Http\Controllers\API\AuthController::class, 'login'])->middleware(['api', 'JsonRes']);
 
