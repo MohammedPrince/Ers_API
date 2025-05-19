@@ -1,12 +1,7 @@
 <?php
 namespace App\Http\Controllers\API;
 
-use App\Models\FibFlag;
-use App\Models\StudentFib;
-use Auth;
-use App\Models\User;
-use App\Models\User_Token;
-use Illuminate\Http\Request;
+
 use App\Services\ErsMainService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\BankAccessRequest;

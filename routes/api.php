@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\Api\AuthController;
@@ -16,12 +16,12 @@ use App\Http\Controllers\Api\AuthController;
 */
 
 //Public Routes
-Route::post('/login', [AuthController::class, 'login'])->middleware(['api', 'JsonRes']);
+Route::post('/login', [App\Http\Controllers\API\AuthController::class, 'login'])->middleware(['api', 'JsonRes']);
 
 //Protecting Routes
 Route::group(['middleware' => ['auth:sanctum']], function (){
 
-    Route::post('/inquiry', [ApiController::class, 'studentInquiry']);
-    Route::post('/payment', [ApiController::class, 'studentPayment']);
+    Route::post('/inquiry', [App\Http\Controllers\ApiController::class, 'studentInquiry']);
+    Route::post('/payment', [App\Http\Controllers\ApiController::class, 'studentPayment']);
     // Route::post('/logout', [AuthController::class, 'logout']);
 });
