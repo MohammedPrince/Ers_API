@@ -78,9 +78,9 @@ class ErsMainRepository
                 // 'current_date' => $current_date,
             ];
 
-            if ($current_date > $start_date) {
-                return ['success' => false, 'code' => 403, 'message' => 'Registration closed',];
-            }
+            // if ($current_date > $start_date) {
+            //     return ['success' => false, 'code' => 403, 'message' => 'Registration closed',];
+            // }
 
             // if ($viewData === 2) {
             //     return ['success' => false, 'code' => 409, 'message' => 'Student already paid',];
