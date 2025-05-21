@@ -97,7 +97,7 @@ class ApiController extends Controller
 
     public function getData()
     {
-        $var = 'hello World !';
+        $var = 'hello World from fu.edu.sd';
         return response()->json([
             'status' => 'success',
             'code' => 200,
