@@ -78,7 +78,17 @@ class ApiController extends Controller
         $response = Http::get('http://196.1.204.142/api/index.php');
 
         if ($response->successful()) {
-            return response()->json($response->json());
+
+            $content = $response->body();
+            $decoded = json_decode($content, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return response()->json($decoded);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => $content,
+            ]);
         }
 
         return response()->json(['error' => 'Failed to fetch data'], 500);
