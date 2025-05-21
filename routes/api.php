@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\AuthController;
 */
 Route::get('/getData', [App\Http\Controllers\ApiController::class, 'getData'])->middleware(['api', 'JsonRes']);
 Route::get('/fetchData', [App\Http\Controllers\ApiController::class, 'fetchFromLive'])->middleware(['api', 'JsonRes']);
+Route::get('/fetchDataFromLocal', [App\Http\Controllers\ApiController::class, 'fetchDataFromLocal'])->middleware(['api', 'JsonRes']);
 //Public Routes
 Route::post('/login', [App\Http\Controllers\API\AuthController::class, 'login'])->middleware(['api', 'JsonRes']);
 

@@ -73,6 +73,17 @@ class ApiController extends Controller
         return response()->json(['error' => 'Failed to fetch data'], 500);
     }
 
+    public function fetchDataFromLocal()
+    {
+        $response = Http::get('http://196.1.204.142:8010/api/index.php');
+
+        if ($response->successful()) {
+            return response()->json($response->json());
+        }
+
+        return response()->json(['error' => 'Failed to fetch data'], 500);
+    }
+
 
     public function getData()
     {
