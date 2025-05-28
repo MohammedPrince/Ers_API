@@ -75,16 +75,40 @@ class ApiController extends Controller
 
     public function fetchDataFromLocal()
     {
-        $response = Http::get('http://196.1.204.142/api/index.php');
 
-        if ($response->successful()) {
-            // Laravel will auto-detect and decode JSON
-            return response()->json($response->json(), 200);
+        $url = 'http://196.1.204.142/api/index.php';
+        $data = [];
+        $currentUrl = request()->url();
+
+        if (str_contains($currentUrl, 'http://127.0.0.1:8001/')) {
+            // Add port 8010
+            $parsed = parse_url($url);
+            $hostWithPort = $parsed['host'] . ':8010';
+            $url = "{$parsed['scheme']}://{$hostWithPort}{$parsed['path']}";
+        } elseif (str_contains($currentUrl, 'https://api.fu.edu.sd/')) {
+            $parsed = parse_url($url);
+            $url = "{$parsed['scheme']}://{$parsed['host']}{$parsed['path']}";
         }
 
-        return response()->json(['error' => 'Failed to fetch data'], 500);
-    }
+        $response = Http::get($url);
+        $raw = $response->body();
 
+        preg_match_all('/\{.*?\}(?=\{|\z)/s', $raw, $matches);
+
+        foreach ($matches[0] as $jsonPart) {
+            $decoded = json_decode($jsonPart, true);
+            if (is_array($decoded)) {
+                $data = array_merge($data, $decoded);
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'code' => 200,
+            'message' => 'Data fetched successfully',
+            'data' => $data
+        ]);
+    }
 
     public function getData()
     {
