@@ -32,4 +32,9 @@ class ErsMainService
     {
          return $this->ersMainRepository->studentPayment($data);
     }
+
+    public function saveLocalServerData($response)
+    {
+         return $this->ersMainRepository->saveLocalServerData($response);
+    }
 }

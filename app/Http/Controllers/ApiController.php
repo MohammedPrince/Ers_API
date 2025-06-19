@@ -77,7 +77,7 @@ class ApiController extends Controller
     {
 
         $url = 'http://196.1.204.142/api/index.php';
-        $data = [];
+
         $currentUrl = request()->url();
 
         if (str_contains($currentUrl, 'http://127.0.0.1:8001/')) {
@@ -91,23 +91,23 @@ class ApiController extends Controller
         }
 
         $response = Http::get($url);
-        $raw = $response->body();
 
-        preg_match_all('/\{.*?\}(?=\{|\z)/s', $raw, $matches);
+        $result = $this->ersMainService->saveLocalServerData($response);
 
-        foreach ($matches[0] as $jsonPart) {
-            $decoded = json_decode($jsonPart, true);
-            if (is_array($decoded)) {
-                $data = array_merge($data, $decoded);
-            }
+        if ($result['success']) {
+            return response()->json([
+                'status' => 'success',
+                'code' => $result['code'],
+                'message' => $result['message'] ?? Null,
+                'LocalServerData' => $result['LocalServerData'] ?? [],
+            ], $result['code']);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'code' => $result['code'],
+                'error' => $result['message'],
+            ], $result['code'], );
         }
-
-        return response()->json([
-            'status' => 'success',
-            'code' => 200,
-            'message' => 'Data fetched successfully',
-            'data' => $data
-        ]);
     }
 
     public function getData()

@@ -10,7 +10,9 @@ use App\Models\PaymentFib;
 use App\Models\StudentFib;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Requests\Api\StudentPaymentRequest;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
 
 class ErsMainRepository
 {
@@ -206,17 +208,66 @@ class ErsMainRepository
                         return ['success' => true, 'code' => 200, 'message' => 'Student payment successfully done'];
                         // return ['success' => true, 'code' => 200, 'message' => 'Student payment successfully inserted', 'paymentDetails' => $paymentData];
                     }
-
                 } else {
                     return ['success' => false, 'code' => 400, 'message' => 'Erorr in add payment'];
                 }
             }
-
         } else {
             return ['success' => false, 'code' => 400, 'message' => 'Student not exist'];
         }
-
     }
 
+    public function saveLocalServerData($response)
+    {
+        // Increase PHP limits for large payloads
+        ini_set('memory_limit', '512M');
+        ini_set('max_execution_time', '300');
 
+        $data = [];
+        $raw = $response->body();
+
+        // Optional: Save raw response to file for debugging
+        file_put_contents(storage_path('logs/last_raw_response.json'), $raw);
+
+        // Attempt to decode the entire JSON
+        $decoded = json_decode($raw, true);
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            $data = $decoded;
+        } else {
+            Log::error('JSON Decode Error: ' . json_last_error_msg());
+            Log::debug('Truncated Raw (1000 chars): ' . substr($raw, 0, 1000));
+
+            // Fallback: Extract and decode individual JSON parts
+            preg_match_all('/\{(?:[^{}]|(?R))*\}/x', $raw, $matches);
+
+            foreach ($matches[0] as $jsonPart) {
+                $partDecoded = json_decode($jsonPart, true);
+
+                if (is_array($partDecoded)) {
+                    foreach ($partDecoded as $key => $value) {
+                        // Handle duplicate keys by merging arrays
+                        if (!isset($data[$key])) {
+                            $data[$key] = $value;
+                        } else {
+                            if (is_array($value) && is_array($data[$key])) {
+                                // Merge arrays if both values are arrays
+                                $data[$key] = array_merge_recursive($data[$key], $value);
+                            } else {
+                                // Otherwise, wrap both in an array
+                                $data[$key] = [$data[$key], $value];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return [
+            'success' => true,
+            'code' => 200,
+            'message' => 'Data fetched successfully',
+            'LocalServerData' => $data
+        ];
+    }
 }
