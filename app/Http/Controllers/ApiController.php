@@ -75,19 +75,44 @@ class ApiController extends Controller
 
     public function fetchDataFromLocal()
     {
-        $response = Http::get('http://196.1.204.142:8010/api/index.php');
 
-        if ($response->successful()) {
-            return response()->json($response->json());
+        $url = 'http://196.1.204.142/api/index.php';
+
+        $currentUrl = request()->url();
+
+        if (str_contains($currentUrl, 'http://127.0.0.1:8001/')) {
+            // Add port 8010
+            $parsed = parse_url($url);
+            $hostWithPort = $parsed['host'] . ':8010';
+            $url = "{$parsed['scheme']}://{$hostWithPort}{$parsed['path']}";
+        } elseif (str_contains($currentUrl, 'https://api.fu.edu.sd/')) {
+            $parsed = parse_url($url);
+            $url = "{$parsed['scheme']}://{$parsed['host']}{$parsed['path']}";
         }
 
-        return response()->json(['error' => 'Failed to fetch data'], 500);
-    }
+        $response = Http::get($url);
 
+        $result = $this->ersMainService->saveLocalServerData($response);
+
+        if ($result['success']) {
+            return response()->json([
+                'status' => 'success',
+                'code' => $result['code'],
+                'message' => $result['message'] ?? Null,
+                'LocalServerData' => $result['LocalServerData'] ?? [],
+            ], $result['code']);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'code' => $result['code'],
+                'error' => $result['message'],
+            ], $result['code'], );
+        }
+    }
 
     public function getData()
     {
-        $var = 'hello World !';
+        $var = 'hello World from fu.edu.sd';
         return response()->json([
             'status' => 'success',
             'code' => 200,
