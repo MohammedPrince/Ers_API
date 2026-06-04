@@ -33,6 +33,11 @@ class ErsMainService
          return $this->ersMainRepository->studentPayment($data);
     }
 
+    public function reconcilePayment($data)
+    {
+         return $this->ersMainRepository->reconcilePayment($data);
+    }
+
     public function saveLocalServerData($response)
     {
          return $this->ersMainRepository->saveLocalServerData($response);

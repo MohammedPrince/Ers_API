@@ -48,6 +48,9 @@ class ErsMainRepository
 
     public function studentInquiry($data)
     {
+        //View Data: 0 :: Offline Cannot pay.
+        //View Data: 1 :: Online Can pay.
+        //View Data: 2 :: Already Paid.
 
         if (!Auth::check() || !Auth::user()) {
             return ['success' => false, 'code' => 401, 'message' => 'Unauthorized access, token missmatch'];
@@ -64,6 +67,8 @@ class ErsMainRepository
 
             $start_date = $student_data->registrationDetails->start_date;
             $viewData = $student_data->registrationDetails->viewData;
+            $totalBankFee = $student_data->registrationDetails->total_fee_bank;
+            $offLine = $student_data->registrationDetails->viewData;
 
             $studentData = [
                 'student_index_no' => $student_data->student_index_no,
@@ -74,19 +79,23 @@ class ErsMainRepository
                 'batch' => $student_data->batch,
                 'semester' => $student_data->semester,
                 'total_fee' => $student_data->total_fee,
-                // 'start_date' => $student_data->registrationDetails->start_date,
-                // 'end_date' => $student_data->registrationDetails->end_date,
-                // 'viewData' => $student_data->registrationDetails->viewData,
-                // 'current_date' => $current_date,
             ];
 
-            // if ($current_date > $start_date) {
-            //     return ['success' => false, 'code' => 403, 'message' => 'Registration closed',];
-            // }
+            if ($offLine == 0) {
+                return ['success' => false, 'code' => 400, 'message' => 'Student offline',];
+            }
 
-            // if ($viewData === 2) {
-            //     return ['success' => false, 'code' => 409, 'message' => 'Student already paid',];
-            // }
+            if ($totalBankFee == 0) {
+                return ['success' => false, 'code' => 400, 'message' => 'Fees not available',];
+            }
+
+            if ($current_date > $start_date) {
+                return ['success' => false, 'code' => 403, 'message' => 'Registration closed',];
+            }
+
+            if ($viewData === 2) {
+                return ['success' => false, 'code' => 409, 'message' => 'Student already paid',];
+            }
 
         } else {
             return ['success' => false, 'code' => 400, 'message' => 'Student not exist',];
@@ -157,9 +166,9 @@ class ErsMainRepository
             $end_date = $student_data->registrationDetails->end_date;
             $viewData = $student_data->registrationDetails->viewData;
 
-            // if ($current_date > $start_date) {
-            //     return ['success' => false, 'code' => 400, 'message' => 'Registration closed',];
-            // }
+            if ($current_date > $start_date) {
+                return ['success' => false, 'code' => 400, 'message' => 'Registration closed',];
+            }
 
             $paymentCheck = PaymentFib::where('student_index_no', $stud_id)->where('voucher', $voucher)->first();
             if ($paymentCheck || $viewData === 2) {
@@ -217,6 +226,20 @@ class ErsMainRepository
         }
     }
 
+    public function reconcilePayment($data)
+    {
+        $transaction_id = $data['transaction_id'];
+
+        $paymentCheck = PaymentFib::where('voucher', $transaction_id)->first();
+        if ($paymentCheck) {
+            return ['success' => true, 'code' => 200, 'message' => 'Transaction ID exists, Student already paid!'];
+        } elseif (!$paymentCheck) {
+            return ['success' => false, 'code' => 404, 'message' => 'Transaction ID not exists!'];
+        } else {
+            return ['success' => true, 'code' => 400, 'message' => 'Error in transaction check!'];
+        }
+    }
+
     public function saveLocalServerData($response)
     {
         // Increase PHP limits for large payloads
@@ -227,7 +250,7 @@ class ErsMainRepository
         $raw = $response->body();
 
         // Optional: Save raw response to file for debugging
-        file_put_contents(storage_path('logs/last_raw_response.json'), $raw);
+       // file_put_contents(storage_path('logs/last_raw_response.json'), $raw);
 
         // Attempt to decode the entire JSON
         $decoded = json_decode($raw, true);
@@ -262,6 +285,8 @@ class ErsMainRepository
                 }
             }
         }
+
+       // dd($data['facultyDetails'][0]['faculty_desc']);
 
         return [
             'success' => true,
