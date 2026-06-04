@@ -102,7 +102,7 @@ class ApiController extends Controller
         // dd($faculty_code, $major_code, $batch, $semester);
 
         // $url = "http://127.0.0.1:8000/ers/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
-        $url = "http://41.41.129.31/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
+        $url = "http://41.41.129.31:886/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
 
         $currentUrl = request()->url();
 
