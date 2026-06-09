@@ -101,21 +101,10 @@ class ApiController extends Controller
 
         // dd($faculty_code, $major_code, $batch, $semester);
 
-        // $url = "http://127.0.0.1:8000/ers/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
-        $url = "http://41.41.129.31/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
-
-        $currentUrl = request()->url();
-
-        // if (str_contains($currentUrl, 'http://127.0.0.1:8001/')) {
-        //     // Add port 8010
-        //     $parsed = parse_url($url);
-        //     $hostWithPort = $parsed['host'] . ':8010';
-        //     $url = "{$parsed['scheme']}://{$hostWithPort}{$parsed['path']}";
-        // } elseif (str_contains($currentUrl, 'https://api.fu.edu.sd/')) {
-        //     $parsed = parse_url($url);
-        //     $url = "{$parsed['scheme']}://{$parsed['host']}{$parsed['path']}";
-        // }
-
+        //$url = "http://127.0.0.1:8000/ers/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
+        //$url = "http://196.1.204.142/ers/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
+        $url = "http://156.204.9.217/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
+   
         $response = Http::get($url);
 
         $result = $this->ersMainService->saveLocalServerData($response);
