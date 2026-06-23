@@ -38,7 +38,7 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'ers_users',
         ],
         'api' => [
             'driver' => 'sanctum',
@@ -65,15 +65,17 @@ return [
     */
 
     'providers' => [
+
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'ers_users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\ERSUser::class,
+        ],
+
     ],
 
     /*

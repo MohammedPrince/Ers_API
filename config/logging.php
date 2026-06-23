@@ -113,6 +113,13 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+
+        'ersLogs' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/ersLogs.log'),
+            'level' => 'debug',
+            'days' => 30,
+        ],
     ],
 
 ];

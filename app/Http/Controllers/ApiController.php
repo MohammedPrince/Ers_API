@@ -8,12 +8,14 @@ use App\Http\Requests\Api\StudentPaymentRequest;
 use App\Services\ErsMainService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Validator;
+
 
 class ApiController extends Controller
 {
 
     protected $ersMainService;
-    public function __construct(ErsMainService $ersMainService)
+    public function __construct(ErsMainService $ersMainService = null)
     {
         $this->ersMainService = $ersMainService;
     }
@@ -94,6 +96,23 @@ class ApiController extends Controller
     public function fetchDataFromLocal(Request $request)
     {
 
+        $serverAddress = $this->getServerAddress();
+
+        $validator = Validator::make($request->all(), [
+            'faculty_code' => 'required|integer',
+            'major_code' => 'required|integer',
+            'batch' => 'required|',
+            'semester' => 'required|integer|between:1,10',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 422,
+                'message' => $validator->errors()->first(),
+            ], 422);
+        }
+
         $faculty_code = $request->faculty_code;
         $major_code = $request->major_code;
         $batch = $request->batch;
@@ -101,10 +120,14 @@ class ApiController extends Controller
 
         // dd($faculty_code, $major_code, $batch, $semester);
 
-        //$url = "http://127.0.0.1:8000/ers/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
+        // $url = "http://127.0.0.1:8000/ers/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
         //$url = "http://196.1.204.142/ers/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
-        $url = "http://156.204.9.217/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
-   
+        //$url = "http://156.204.9.217/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
+
+        $url = "http://{$serverAddress}/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
+
+
+
         $response = Http::get($url);
 
         $result = $this->ersMainService->saveLocalServerData($response);
@@ -133,6 +156,15 @@ class ApiController extends Controller
             'code' => 200,
             'message' => $var,
         ], 200);
+    }
+
+    public function getServerAddress()
+    {
+        $file = storage_path('app/settings/server_ip.txt');
+        if (!file_exists($file)) {
+            return '127.0.0.1:8001';
+        }
+        return trim(file_get_contents($file));
     }
 
 }

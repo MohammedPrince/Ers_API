@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\ErsMainRepository;
+use Illuminate\Support\Facades\Log;
 
 class ErsMainService
 {
@@ -13,6 +14,13 @@ class ErsMainService
         $this->ersMainRepository = $ersMainRepository;
     }
 
+    //Web Services
+    public function login($data)
+    {
+        return $this->ersMainRepository->login($data);
+    }
+
+    //API Services
     public function bankLogin($data)
     {
         return $this->ersMainRepository->bankLogin($data);
@@ -30,16 +38,27 @@ class ErsMainService
 
     public function studentPayment($data)
     {
-         return $this->ersMainRepository->studentPayment($data);
+        return $this->ersMainRepository->studentPayment($data);
     }
 
     public function reconcilePayment($data)
     {
-         return $this->ersMainRepository->reconcilePayment($data);
+        return $this->ersMainRepository->reconcilePayment($data);
     }
 
     public function saveLocalServerData($response)
     {
-         return $this->ersMainRepository->saveLocalServerData($response);
+        return $this->ersMainRepository->saveLocalServerData($response);
+    }
+
+    //Logs
+    public function writeLog(string $message, array $context = []): void
+    {
+        Log::channel('ersLogs')->info($message, $context);
+    }
+
+    public function writeError(string $message, array $context = []): void
+    {
+        Log::channel('ersLogs')->error($message, $context);
     }
 }

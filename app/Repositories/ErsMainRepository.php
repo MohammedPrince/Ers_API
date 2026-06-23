@@ -2,23 +2,50 @@
 
 namespace App\Repositories;
 
-use Carbon\Carbon;
-use App\Models\FibFlag;
 use App\Models\BankUser;
-use App\Models\stud_fib;
+use App\Models\ERSUser;
+use App\Models\FibFlag;
 use App\Models\PaymentFib;
 use App\Models\StudentFib;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 
 class ErsMainRepository
 {
-    public function __construct()
+
+    public function login($data)
     {
-        //
+        $user = ERSUser::where(
+            'user_login_name',
+            $data->input('username')
+        )->first();
+
+        if (!$user) {
+            return [
+                'success' => false,
+                'message' => 'Invalid username'
+            ];
+        }
+
+        if ($user->password != $data->input('password')) {
+            return [
+                'success' => false,
+                'message' => 'Invalid password'
+            ];
+        }
+
+        Auth::guard('web')->login($user);
+
+        $data->session()->regenerate();
+
+        return [
+            'success' => true,
+            'message' => 'Login successful'
+        ];
     }
 
     public function bankLogin($data)
@@ -240,59 +267,371 @@ class ErsMainRepository
         }
     }
 
-    public function saveLocalServerData($response)
+
+    public function saveLocalServerData($response): array
     {
-        // Increase PHP limits for large payloads
-        ini_set('memory_limit', '512M');
-        ini_set('max_execution_time', '300');
 
-        $data = [];
-        $raw = $response->body();
+        ini_set('memory_limit', '1024M');
+        set_time_limit(300);
 
-        // Optional: Save raw response to file for debugging
-       // file_put_contents(storage_path('logs/last_raw_response.json'), $raw);
+        $startTime = microtime(true);
+        $currentStep = 'Initialization';
 
-        // Attempt to decode the entire JSON
-        $decoded = json_decode($raw, true);
+        try {
 
-        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-            $data = $decoded;
-        } else {
-            Log::error('JSON Decode Error: ' . json_last_error_msg());
-            Log::debug('Truncated Raw (1000 chars): ' . substr($raw, 0, 1000));
+            if (!$response->successful()) {
 
-            // Fallback: Extract and decode individual JSON parts
-            preg_match_all('/\{(?:[^{}]|(?R))*\}/x', $raw, $matches);
-
-            foreach ($matches[0] as $jsonPart) {
-                $partDecoded = json_decode($jsonPart, true);
-
-                if (is_array($partDecoded)) {
-                    foreach ($partDecoded as $key => $value) {
-                        // Handle duplicate keys by merging arrays
-                        if (!isset($data[$key])) {
-                            $data[$key] = $value;
-                        } else {
-                            if (is_array($value) && is_array($data[$key])) {
-                                // Merge arrays if both values are arrays
-                                $data[$key] = array_merge_recursive($data[$key], $value);
-                            } else {
-                                // Otherwise, wrap both in an array
-                                $data[$key] = [$data[$key], $value];
-                            }
-                        }
-                    }
-                }
+                return [
+                    'success' => false,
+                    'code' => $response->status(),
+                    'failed_step' => 'Remote Request',
+                    'message' => 'Remote server returned HTTP ' . $response->status(),
+                ];
             }
+
+            $raw = $response->body();
+
+            $data = json_decode($raw, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+
+                Log::error(
+                    'JSON Decode Error: ' . json_last_error_msg()
+                );
+
+                Log::debug(
+                    'Response Preview',
+                    [
+                        'raw' => substr($raw, 0, 1000)
+                    ]
+                );
+
+                return [
+                    'success' => false,
+                    'code' => 500,
+                    'failed_step' => 'JSON Decode',
+                    'message' => 'Invalid JSON response received.',
+                ];
+            }
+
+            $studentDetails =
+                $data['LocalServerData']['studentDetails']
+                ?? [];
+
+            $batchControlDetails =
+                $data['LocalServerData']['batchControlDetails']
+                ?? [];
+
+            $localFlagDetails =
+                $data['LocalServerData']['studentFlagDetails']
+                ?? [];
+
+            $semRegistrationDetails =
+                $data['LocalServerData']['semesterRegisterDetails']
+                ?? [];
+
+            Log::channel('ersLogs')->info(
+                'Synchronization Started',
+                [
+                    'students' => count($studentDetails),
+                    'batch_control' => count($batchControlDetails),
+                    'semester_register' => count($semRegistrationDetails),
+                    'local_flags' => count($localFlagDetails),
+                ]
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | Batch Control
+            |--------------------------------------------------------------------------
+            */
+
+            if (!empty($batchControlDetails)) {
+
+                $currentStep = 'Batch Control';
+
+                DB::beginTransaction();
+
+                Log::channel('ersLogs')->info(
+                    'Batch Control Started',
+                    [
+                        'count' => count($batchControlDetails)
+                    ]
+                );
+
+                $this->upsertBatchControl(
+                    $batchControlDetails
+                );
+
+                DB::commit();
+
+                Log::channel('ersLogs')->info(
+                    'Batch Control Completed',
+                    [
+                        'count' => count($batchControlDetails)
+                    ]
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Student Details
+            |--------------------------------------------------------------------------
+            */
+
+            if (!empty($studentDetails)) {
+
+                $currentStep = 'Student Details';
+
+                DB::beginTransaction();
+
+                Log::channel('ersLogs')->info(
+                    'Student Sync Started',
+                    [
+                        'count' => count($studentDetails)
+                    ]
+                );
+
+                $this->upsertStudentFeeLatest(
+                    $studentDetails
+                );
+
+                DB::commit();
+
+                Log::channel('ersLogs')->info(
+                    'Student Sync Completed',
+                    [
+                        'count' => count($studentDetails)
+                    ]
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Semester Registration
+            |--------------------------------------------------------------------------
+            */
+
+            if (!empty($semRegistrationDetails)) {
+
+                $currentStep = 'Semester Registration';
+
+                DB::beginTransaction();
+
+                Log::channel('ersLogs')->info(
+                    'Semester Registration Started',
+                    [
+                        'count' => count($semRegistrationDetails)
+                    ]
+                );
+
+                $this->upsertSemRegistration(
+                    $semRegistrationDetails
+                );
+
+                DB::commit();
+
+                Log::channel('ersLogs')->info(
+                    'Semester Registration Completed',
+                    [
+                        'count' => count($semRegistrationDetails)
+                    ]
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Local Flags
+            |--------------------------------------------------------------------------
+            */
+
+            if (!empty($localFlagDetails)) {
+
+                $currentStep = 'Local Flags';
+
+                DB::beginTransaction();
+
+                Log::channel('ersLogs')->info(
+                    'Local Flags Started',
+                    [
+                        'count' => count($localFlagDetails)
+                    ]
+                );
+
+                $this->upsertLocalFlag(
+                    $localFlagDetails
+                );
+
+                DB::commit();
+
+                Log::channel('ersLogs')->info(
+                    'Local Flags Completed',
+                    [
+                        'count' => count($localFlagDetails)
+                    ]
+                );
+            }
+
+            $duration = round(
+                microtime(true) - $startTime,
+                2
+            );
+
+            Log::channel('ersLogs')->info(
+                'Synchronization Completed',
+                [
+                    'duration' => $duration . ' sec'
+                ]
+            );
+
+            return [
+                'success' => true,
+                'code' => 200,
+                'message' => 'Synchronization completed successfully.',
+                'duration' => $duration . ' sec',
+                'students_count' => count($studentDetails),
+                'batch_control_count' => count($batchControlDetails),
+                'semester_registration_count' => count($semRegistrationDetails),
+                'local_flags_count' => count($localFlagDetails),
+                'LocalServerData' => $data,
+            ];
+
+        } catch (\Throwable $e) {
+
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+
+            Log::channel('ersLogs')->error(
+                'Synchronization Failed',
+                [
+                    'step' => $currentStep,
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                ]
+            );
+
+            return [
+                'success' => false,
+                'code' => 500,
+                'failed_step' => $currentStep,
+                'message' => $e->getMessage(),
+            ];
         }
+    }
 
-       // dd($data['facultyDetails'][0]['faculty_desc']);
+    private function upsertStudentFeeLatest(array $students): void
+    {
+        $now = now();
 
-        return [
-            'success' => true,
-            'code' => 200,
-            'message' => 'Data fetched successfully',
-            'LocalServerData' => $data
-        ];
+        foreach ($students as $index => $student) {
+
+            if ($index % 100 === 0) {
+
+                Log::channel('ersLogs')->info('Student sync progress', [
+                    'current' => $index,
+                    'total' => count($students)
+                ]);
+            }
+
+            DB::table('fu_student_fee_fib_latest')->updateOrInsert(
+                [
+                    'student_index_no' => $student['student_index_no'],
+                    'batch' => $student['batch'],
+                    'semester' => $student['semester'],
+                    'academic_year' => $student['academic_year'],
+                    'faculty_code' => $student['faculty_code'],
+                    'major_code' => $student['major_code'],
+                ],
+                [
+                    'student_name_en' => $student['student_name_en'],
+                    'dept' => $student['dept'],
+                    'cty_description' => $student['cty_description'],
+                    'fee_year' => $student['fee_year'],
+                    'fee_semester' => $student['fee_semester'],
+                    'discount' => $student['discount'] ?? 0,
+                    'remarks' => $student['remarks'] ?? null,
+                    'current_fee' => $student['current_fee'] ?? null,
+                    'total_fee' => $student['total_fee'],
+                    'currency' => $student['currency'],
+                    'date' => $student['date'],
+                    'fee_type' => $student['fee_type'] ?? null,
+                    'status' => $student['status'] ?? null,
+                    'allow_register' => $student['allow_register'] ?? null,
+                    'cgpa' => $student['cgpa'] ?? null,
+                    'repeater' => $student['repeater'] ?? null,
+                    'fee_late_reg' => $student['fee_late_reg'] ?? 0,
+                    'nationality' => $student['nationality'] ?? null,
+                    'allow_late_register' => $student['allow_late_register'] ?? 0,
+                    'user_name' => $student['user_name'] ?? null,
+                    'student_del' => $student['student_del'] ?? 0,
+                    'date_time' => $now,
+                ]
+            );
+        }
+    }
+
+    private function upsertBatchControl(array $batchControlDetails): void
+    {
+        $now = now();
+        foreach ($batchControlDetails as $batchControl) {
+            DB::table('batch_control')->updateOrInsert(
+                [
+                    'dept_batch_id' => $batchControl['dept_batch_id'],
+                ],
+                [
+                    'dept_code' => $batchControl['dept_code'],
+                    'dept_name' => $batchControl['dept_name'],
+                    'batch' => $batchControl['batch'],
+                    'created_by' => $batchControl['created_by'],
+                    'creation_date' => $batchControl['creation_date'],
+                    'last_update_date' => $batchControl['last_update_date'],
+                ]
+            );
+        }
+    }
+
+    private function upsertSemRegistration(array $semRegistrationDetails)
+    {
+        $now = now();
+        foreach ($semRegistrationDetails as $semRegistration) {
+            DB::table('sem_registration_setup')->updateOrInsert(
+                [
+                    'sem_reg_id' => $semRegistration['sem_reg_id'],
+                ],
+                [
+                    'faculty_code' => $semRegistration['faculty_code'],
+                    'batch' => $semRegistration['batch'],
+                    'CurrentSem' => $semRegistration['CurrentSem'],
+                    'registration_date_from' => $semRegistration['registration_date_from'],
+                    'registration_date_to' => $semRegistration['registration_date_to'],
+                    'reg_type' => $semRegistration['reg_type'],
+                    'created_by' => $semRegistration['created_by'],
+                    'creation_date' => $semRegistration['creation_date'],
+                    'last_update_date' => $semRegistration['last_update_date'],
+                ]
+            );
+        }
+    }
+    private function upsertLocalFlag(array $localFlagDetails)
+    {
+        $now = now();
+        foreach ($localFlagDetails as $localFlag) {
+            DB::table('fu_student_fee_fib_flag_local')->updateOrInsert(
+                [
+                    'student_index_no' => $localFlag['student_index_no'],
+                ],
+                [
+                    'update_flag' => $localFlag['update_flag'],
+                    'date' => $localFlag['date'],
+                    'total_fee_bank' => $localFlag['total_fee_bank'],
+                    'viewData' => $localFlag['viewData'],
+                    'start_date' => $localFlag['start_date'],
+                    'end_date' => $localFlag['end_date'],
+                    'user_id' => $localFlag['user_id'],
+                ]
+            );
+        }
     }
 }
