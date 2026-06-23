@@ -9,9 +9,17 @@ class FibFlag extends Model
 {
     use HasFactory;
 
+    protected $table = 'fu_student_fee_fib_flag_local';
+
     protected $primaryKey = 'student_index_no';
 
-    protected $table = 'fu_student_fee_fib_flag_local';
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
     public $timestamps = false;
-    protected $fillable = ['viewData'];
+
+    protected $fillable = [
+        'viewData'
+    ];
 }

@@ -24,6 +24,6 @@ class StudentFib extends Model
 
   public function registrationDetails()
   {
-    return $this->belongsTo(FibFlag::class, 'student_index_no', 'student_index_no');
+    return $this->belongsTo(FibFlag::class, 'student_index_no','student_index_no')->where('del', 0);
   }
 }

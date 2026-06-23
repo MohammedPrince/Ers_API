@@ -86,27 +86,41 @@ class ErsMainRepository
         $studentData = [];
         $stud_id = trim($data['stud_id']);
         $start_date = null;
+        $start_date_admission = null;
         $current_date = Carbon::now()->format('Y-m-d');
+
+        // Check if stud_id starts with XX-
+        if (preg_match('/^(\d{2})-/', $stud_id, $matches)) {
+
+            $batch = '20' . $matches[1]; // 23 -> 2023, 24 -> 2024
+
+            $start_date_admission = DB::table('admission_register_setup')->where('batch', $batch)->value('start_date');
+
+        }
 
         $student_data = StudentFib::where('student_index_no', $stud_id)->with(['registrationDetails', 'faculty', 'major'])->first();
 
         if ($student_data) {
 
-            $start_date = $student_data->registrationDetails->start_date;
-            $viewData = $student_data->registrationDetails->viewData;
-            $totalBankFee = $student_data->registrationDetails->total_fee_bank;
-            $offLine = $student_data->registrationDetails->viewData;
+            $start_date = $student_data->registrationDetails->start_date ?? $start_date_admission;
+            $viewData = $student_data->registrationDetails->viewData ?? 0;
+            $totalBankFee = $student_data->registrationDetails->total_fee_bank ?? 0;
+            $offLine = $student_data->registrationDetails->viewData ?? 0;
 
             $studentData = [
                 'student_index_no' => $student_data->student_index_no,
-                'student_name' => $student_data->student_name_en,
-                'faculty' => $student_data->faculty->faculty_desc_e,
-                'major' => $student_data->major->major_desc_e,
-                'dept' => $student_data->dept,
-                'batch' => $student_data->batch,
+                'student_name' => trim($student_data->student_name_en),
+                'faculty' => trim($student_data->faculty->faculty_desc_e),
+                'major' => trim($student_data->major->major_desc_e),
+                'dept' => trim($student_data->dept),
+                'batch' => trim($student_data->batch),
                 'semester' => $student_data->semester,
-                'total_fee' => $student_data->total_fee,
+                'total_fee' => $totalBankFee,
             ];
+
+            if ($viewData == 0 && $totalBankFee == 0) {
+                return ['success' => false, 'code' => 400, 'message' => 'Flag Error',];
+            }
 
             if ($offLine == 0) {
                 return ['success' => false, 'code' => 400, 'message' => 'Student offline',];
@@ -158,6 +172,7 @@ class ErsMainRepository
         $semester = null;
         $total_fee = null;
         $viewData = null;
+        $start_date = null;
 
         $current_date = Carbon::now()->format('Y-m-d');
 
@@ -184,7 +199,6 @@ class ErsMainRepository
             $fee_type = $student_data->fee_type;
             $fee_late_reg = $student_data->fee_late_reg;
             $current_fee = $student_data->current_fee;
-            $total_fee = $student_data->total_fee;
             $discount = $student_data->discount;
             $faculty_code = $student_data->faculty_code;
             $major_code = $student_data->major_code;
@@ -194,7 +208,7 @@ class ErsMainRepository
             $viewData = $student_data->registrationDetails->viewData;
 
             if ($current_date > $start_date) {
-                return ['success' => false, 'code' => 400, 'message' => 'Registration closed',];
+                return ['success' => false, 'code' => 400, 'message' => 'Registration closed'];
             }
 
             $paymentCheck = PaymentFib::where('student_index_no', $stud_id)->where('voucher', $voucher)->first();
