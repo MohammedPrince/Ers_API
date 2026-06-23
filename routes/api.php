@@ -28,3 +28,7 @@ Route::group(['middleware' => ['auth:sanctum', 'JsonRes']], function () {
     Route::post('/reconcile', [App\Http\Controllers\ApiController::class, 'reconcilePayment']);
     // Route::post('/logout', [AuthController::class, 'logout']);
 });
+
+Route::get('/server-test', function () {
+     return php_sapi_name() . ' | ' . ($_SERVER['SERVER_SOFTWARE'] ?? 'Unknown');
+});
