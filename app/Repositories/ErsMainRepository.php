@@ -118,12 +118,12 @@ class ErsMainRepository
                 'total_fee' => $totalBankFee,
             ];
 
-            if ($viewData == 0 ) {
-                return ['success' => false, 'code' => 400, 'message' => 'Flag Error-V: '.$viewData];
+            if ($viewData == 0) {
+                return ['success' => false, 'code' => 400, 'message' => 'Flag Error-V: ' . $viewData];
             }
 
             if ($totalBankFee == 0) {
-                return ['success' => false, 'code' => 400, 'message' => 'Flag Error-BF: '.$totalBankFee];
+                return ['success' => false, 'code' => 400, 'message' => 'Flag Error-BF: ' . $totalBankFee];
             }
 
             if ($offLine == 0) {
@@ -160,12 +160,12 @@ class ErsMainRepository
         $bank_name = $bank->bank_name;
         $bank_ip = $bank->bank_ip;
 
-        $stud_id = $data['stud_id'];
-        $amount = $data['amount'];
+        $stud_id = trim($data['stud_id']);
+        $amount = trim($data['amount']);
         $bank_code = 2;
         $branch_code = 1;
-        $voucher = $data['voucher'];
-        $transcation_no = $data['transcation_no'];
+        $voucher = trim($data['voucher']);
+        $transcation_no = trim($data['transcation_no']);
         $date = $data['date'];
 
         $student_name_en = null;
@@ -210,6 +210,11 @@ class ErsMainRepository
             $start_date = $student_data->registrationDetails->start_date;
             $end_date = $student_data->registrationDetails->end_date;
             $viewData = $student_data->registrationDetails->viewData;
+
+
+            if ($amount != $total_fee) {
+                return ['success' => false, 'code' => 400, 'message' => 'Amount not correct'];
+            }
 
             if ($current_date > $start_date) {
                 return ['success' => false, 'code' => 400, 'message' => 'Registration closed'];
