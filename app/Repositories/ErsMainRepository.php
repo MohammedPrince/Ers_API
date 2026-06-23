@@ -118,8 +118,12 @@ class ErsMainRepository
                 'total_fee' => $totalBankFee,
             ];
 
-            if ($viewData == 0 && $totalBankFee == 0) {
-                return ['success' => false, 'code' => 400, 'message' => 'Flag Error',];
+            if ($viewData == 0 ) {
+                return ['success' => false, 'code' => 400, 'message' => 'Flag Error-V: '.$viewData];
+            }
+
+            if ($totalBankFee == 0) {
+                return ['success' => false, 'code' => 400, 'message' => 'Flag Error-BF: '.$totalBankFee];
             }
 
             if ($offLine == 0) {
