@@ -253,6 +253,8 @@ class ErsMainRepository
                     'currency' => $currency,
                     'faculty_code' => $faculty_code,
                     'major_code' => $major_code,
+                    //Set remark
+                    'remark' => $bank_name
                 ];
 
                 $addPayment = PaymentFib::create($paymentData);
