@@ -107,6 +107,8 @@ class SettingsController extends Controller
                         'Batch Control' => $result['batch_control_count'] ?? 0,
                         'Student Details' => $result['students_count'] ?? 0,
                         'Semester Registration' => $result['semester_registration_count'] ?? 0,
+                        'Student Fee' => $result['student_fee'] ?? 0,
+                        'Student Fee FU' => $result['student_fee_fu'] ?? 0,
                         'Local Flags' => $result['local_flags_count'] ?? 0,
                     ],
                 ]);

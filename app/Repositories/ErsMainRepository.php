@@ -355,6 +355,14 @@ class ErsMainRepository
                 $data['LocalServerData']['semesterRegisterDetails']
                 ?? [];
 
+            $studentFeeDetails =
+                $data['LocalServerData']['studentFeeDetails']
+                ?? [];
+
+            $studentFeeFUDetails =
+                $data['LocalServerData']['studentFeeFUDetails']
+                ?? [];
+
             Log::channel('ersLogs')->info(
                 'Synchronization Started',
                 [
@@ -362,6 +370,8 @@ class ErsMainRepository
                     'batch_control' => count($batchControlDetails),
                     'semester_register' => count($semRegistrationDetails),
                     'local_flags' => count($localFlagDetails),
+                    'student_fee' => count($studentFeeDetails),
+                    'student_fee_fu' => count($studentFeeFUDetails),
                 ]
             );
 
@@ -378,7 +388,7 @@ class ErsMainRepository
                 DB::beginTransaction();
 
                 Log::channel('ersLogs')->info(
-                    'Batch Control Started',
+                    'Batch Control Sync Started',
                     [
                         'count' => count($batchControlDetails)
                     ]
@@ -391,7 +401,7 @@ class ErsMainRepository
                 DB::commit();
 
                 Log::channel('ersLogs')->info(
-                    'Batch Control Completed',
+                    'Batch Control Sync Completed',
                     [
                         'count' => count($batchControlDetails)
                     ]
@@ -444,7 +454,7 @@ class ErsMainRepository
                 DB::beginTransaction();
 
                 Log::channel('ersLogs')->info(
-                    'Semester Registration Started',
+                    'Semester Registration Sync Started',
                     [
                         'count' => count($semRegistrationDetails)
                     ]
@@ -457,9 +467,42 @@ class ErsMainRepository
                 DB::commit();
 
                 Log::channel('ersLogs')->info(
-                    'Semester Registration Completed',
+                    'Semester Registration Sync Completed',
                     [
                         'count' => count($semRegistrationDetails)
+                    ]
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Student Fee Fu
+            |--------------------------------------------------------------------------
+            */
+
+            if (!empty($studentFeeDetails)) {
+
+                $currentStep = 'Student Fee';
+
+                DB::beginTransaction();
+
+                Log::channel('ersLogs')->info(
+                    'Student Fee Sync Started',
+                    [
+                        'count' => count($studentFeeDetails)
+                    ]
+                );
+
+                $this->upsertStudentFee(
+                    $studentFeeDetails
+                );
+
+                DB::commit();
+
+                Log::channel('ersLogs')->info(
+                    'Student Fee Sync Completed',
+                    [
+                        'count' => count($studentFeeDetails)
                     ]
                 );
             }
@@ -472,12 +515,12 @@ class ErsMainRepository
 
             if (!empty($localFlagDetails)) {
 
-                $currentStep = 'Local Flags';
+                $currentStep = 'Local Flag';
 
                 DB::beginTransaction();
 
                 Log::channel('ersLogs')->info(
-                    'Local Flags Started',
+                    'Local Flag Sync Started',
                     [
                         'count' => count($localFlagDetails)
                     ]
@@ -490,9 +533,42 @@ class ErsMainRepository
                 DB::commit();
 
                 Log::channel('ersLogs')->info(
-                    'Local Flags Completed',
+                    'Local Flag Sync Completed',
                     [
                         'count' => count($localFlagDetails)
+                    ]
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Student Fee
+            |--------------------------------------------------------------------------
+            */
+
+            if (!empty($studentFeeFUDetails)) {
+
+                $currentStep = 'Student Fee Fu';
+
+                DB::beginTransaction();
+
+                Log::channel('ersLogs')->info(
+                    'Student Fee Fu Sync Started',
+                    [
+                        'count' => count($studentFeeFUDetails)
+                    ]
+                );
+
+                $this->upsertStudFeeFUDetails(
+                    $studentFeeFUDetails
+                );
+
+                DB::commit();
+
+                Log::channel('ersLogs')->info(
+                    'Student Fee Fu Sync Completed',
+                    [
+                        'count' => count($studentFeeFUDetails)
                     ]
                 );
             }
@@ -518,6 +594,8 @@ class ErsMainRepository
                 'batch_control_count' => count($batchControlDetails),
                 'semester_registration_count' => count($semRegistrationDetails),
                 'local_flags_count' => count($localFlagDetails),
+                'studnet_fee' => count($studentFeeDetails),
+                'student_fee_fu' => count($studentFeeFUDetails),
                 'LocalServerData' => $data,
             ];
 
@@ -562,14 +640,19 @@ class ErsMainRepository
 
             DB::table('fu_student_fee_fib_latest')->updateOrInsert(
                 [
-                    'student_index_no' => $student['student_index_no'],
+                    'student_fee_id' => $student['student_fee_id'],
+                    // 'batch' => $student['batch'],
+                    // 'semester' => $student['semester'],
+                    // 'academic_year' => $student['academic_year'],
+                    // 'faculty_code' => $student['faculty_code'],
+                    // 'major_code' => $student['major_code'],
+                ],
+                [
                     'batch' => $student['batch'],
                     'semester' => $student['semester'],
                     'academic_year' => $student['academic_year'],
                     'faculty_code' => $student['faculty_code'],
                     'major_code' => $student['major_code'],
-                ],
-                [
                     'student_name_en' => $student['student_name_en'],
                     'dept' => $student['dept'],
                     'cty_description' => $student['cty_description'],
@@ -639,6 +722,7 @@ class ErsMainRepository
             );
         }
     }
+
     private function upsertLocalFlag(array $localFlagDetails)
     {
         $now = now();
@@ -655,6 +739,98 @@ class ErsMainRepository
                     'start_date' => $localFlag['start_date'],
                     'end_date' => $localFlag['end_date'],
                     'user_id' => $localFlag['user_id'],
+                ]
+            );
+        }
+    }
+
+    private function upsertStudentFee(array $studentFeeDetails)
+    {
+        $now = now();
+        foreach ($studentFeeDetails as $studentFee) {
+            DB::table('fu_student_fee_fib')->updateOrInsert(
+                [
+                    'student_fee_id' => $studentFee['student_fee_id'],
+                ],
+                [
+                    'student_name_en' => $studentFee['student_name_en'],
+                    'dept' => $studentFee['dept'],
+                    'batch' => $studentFee['batch'],
+                    'semester' => $studentFee['semester'],
+                    'academic_year' => $studentFee['academic_year'],
+                    'cty_description' => $studentFee['cty_description'],
+                    'fee_year' => $studentFee['fee_year'],
+
+                    'fee_semester' => $studentFee['fee_semester'],
+                    'discount' => $studentFee['discount'],
+                    'remarks' => $studentFee['remarks'],
+                    'current_fee' => $studentFee['current_fee'],
+                    'total_fee' => $studentFee['total_fee'],
+                    'currency' => $studentFee['currency'],
+                    'date' => $studentFee['date'],
+
+                    'fee_type' => $studentFee['fee_type'],
+                    'status' => $studentFee['status'],
+                    'allow_register' => $studentFee['allow_register'],
+                    'cgpa' => $studentFee['cgpa'],
+                    'repeater' => $studentFee['repeater'],
+                    'fee_late_reg' => $studentFee['fee_late_reg'],
+                    'nationality' => $studentFee['nationality'],
+
+                    'faculty_code' => $studentFee['faculty_code'],
+                    'major_code' => $studentFee['major_code'],
+                    'user_name' => $studentFee['user_name'],
+                    'date_time' => $studentFee['date_time'],
+                ]
+            );
+        }
+    }
+
+    private function upsertStudFeeFUDetails(array $studentFeeFUDetails)
+    {
+        $now = now();
+        foreach ($studentFeeFUDetails as $studentFeeFU) {
+            DB::table('student_fee_fu')->updateOrInsert(
+                [
+                    'StudentFeeId' => $studentFeeFU['StudentFeeId'],
+                ],
+                [
+                    'Batch' => $studentFeeFU['Batch'],
+                    'AcademicYear' => $studentFeeFU['AcademicYear'],
+                    'Dept' => $studentFeeFU['Dept'],
+                    'StdIndexNo' => $studentFeeFU['StdIndexNo'],
+                    'StdNameEn' => $studentFeeFU['StdNameEn'],
+                    'StdNameAr' => $studentFeeFU['StdNameAr'],
+                    'CurrentSem' => $studentFeeFU['CurrentSem'],
+
+                    'icdl_fees' => $studentFeeFU['icdl_fees'],
+                    'TotalAmount' => $studentFeeFU['TotalAmount'],
+                    'PayedAmount' => $studentFeeFU['PayedAmount'],
+                    'InvoiceNo' => $studentFeeFU['InvoiceNo'],
+                    'remarks' => $studentFeeFU['remarks'],
+                    'current_fee' => $studentFeeFU['current_fee'],
+                    'total_fee' => $studentFeeFU['total_fee'],
+
+                    'currency' => $studentFeeFU['currency'],
+                    'RegistrationType' => $studentFeeFU['RegistrationType'],
+                    'Remark' => $studentFeeFU['Remark'],
+                    'Nationality' => $studentFeeFU['Nationality'],
+                    'CTYDescription' => $studentFeeFU['CTYDescription'],
+                    'ScriptDateTime' => $studentFeeFU['ScriptDateTime'],
+                    'status' => $studentFeeFU['status'],
+                    'cgpa' => $studentFeeFU['cgpa'],
+                    'date' => $studentFeeFU['date'],
+
+                    'repeater' => $studentFeeFU['repeater'],
+                    'allow_late_register' => $studentFeeFU['allow_late_register'],
+                    'StdIndexNoTemp' => $studentFeeFU['StdIndexNoTemp'],
+
+                    'deleted' => $studentFeeFU['deleted'],
+                    'faculty_code' => $studentFeeFU['faculty_code'],
+                    'major_code' => $studentFeeFU['major_code'],
+                    'Student_Group' => $studentFeeFU['Student_Group'],
+                    'user_name' => $studentFeeFU['user_name'],
+                    'date_time' => $studentFeeFU['date_time'],
                 ]
             );
         }
