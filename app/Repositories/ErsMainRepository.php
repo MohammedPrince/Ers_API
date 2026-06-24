@@ -229,7 +229,7 @@ class ErsMainRepository
                 return ['success' => false, 'code' => 400, 'message' => 'Invalid Date'];
             }
 
-            $paymentCheck = PaymentFib::where('student_index_no', $stud_id)->where('voucher', $voucher)->first();
+            $paymentCheck = PaymentFib::where('voucher', $voucher)->first();
             if ($paymentCheck || $viewData === 2) {
                 return ['success' => false, 'code' => 409, 'message' => 'Student already paid'];
             } else {
