@@ -20,6 +20,14 @@ class FibFlag extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'viewData'
+        'student_index_no',
+        'update_flag',
+        'date',
+        'total_fee_bank',
+        'viewData',
+        'start_date',
+        'end_date',
+        'user_id',
+        'del',
     ];
 }
