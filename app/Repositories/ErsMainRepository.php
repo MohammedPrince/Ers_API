@@ -181,17 +181,8 @@ class ErsMainRepository
 
         if ($student_data) {
 
-            // Check if stud_id starts with XX-
-            if (preg_match('/^(\d{2})-/', $stud_id, $matches)) {
-                $batch = '20' . $matches[1]; // 23 -> 2023, 24 -> 2024
-                $start_date = DB::table('admission_register_setup')->where('batch', $batch)->value('start_date');
-                $totalBankFee = $student_data->total_fee;
-                $viewData = 1;
-                $offLine = 1;
-            }
-
-            $start_date = $student_data->registrationDetails->start_date;
-            $viewData = $student_data->registrationDetails->viewData;
+            // $start_date = $student_data->registrationDetails->start_date;
+            // $viewData = $student_data->registrationDetails->viewData;
 
             $student_index_no = $student_data->student_index_no;
             $student_name_en = $student_data->student_name_en;
@@ -213,10 +204,18 @@ class ErsMainRepository
             $faculty_code = $student_data->faculty_code;
             $major_code = $student_data->major_code;
             $currency = $student_data->currency;
-            $start_date = $student_data->registrationDetails->start_date;
-            $end_date = $student_data->registrationDetails->end_date;
-            $viewData = $student_data->registrationDetails->viewData;
+            $start_date = $student_data->registrationDetails->start_date ?? null;
+            $end_date = $student_data->registrationDetails->end_date ?? null;
+            $viewData = $student_data->registrationDetails->viewData ?? null;
 
+            // Check if stud_id starts with XX-
+            if (preg_match('/^(\d{2})-/', $stud_id, $matches)) {
+                $batch = '20' . $matches[1]; // 23 -> 2023, 24 -> 2024
+                $start_date = DB::table('admission_register_setup')->where('batch', $batch)->value('start_date');
+                $end_date = DB::table('admission_register_setup')->where('batch', $batch)->value('end_date');
+                $total_fee = $student_data->total_fee;
+                $viewData = 1;
+            }
 
             if ($amount != $total_fee) {
                 return ['success' => false, 'code' => 400, 'message' => 'Amount not correct'];
