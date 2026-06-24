@@ -225,7 +225,7 @@ class ErsMainRepository
                 return ['success' => false, 'code' => 400, 'message' => 'Registration closed'];
             }
 
-            if ($current_date >= $date) {
+            if ($current_date > $date) {
                 return ['success' => false, 'code' => 400, 'message' => 'Invalid Date'];
             }
 
