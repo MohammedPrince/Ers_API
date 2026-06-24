@@ -25,6 +25,17 @@
             font-weight: 700;
             color: #0f172a;
         }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .footer strong {
+            color: #8B1E1E;
+        }
     </style>
 
 </head>
@@ -239,7 +250,7 @@
 
         </div>
 
-        <div class="text-center mt-4 text-muted">
+        <div class="text-center mt-4 footer">
             Designed & Developed by
             <a href="https://fu.edu.sd/CESD" style="text-decoration:none" target="_blank">
                 <strong>CESD</strong>
