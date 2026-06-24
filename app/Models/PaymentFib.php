@@ -75,6 +75,7 @@ class PaymentFib extends Model
         $p->currency = $data['currency'];
         $p->faculty_code = $data['faculty_code'];
         $p->major_code = $data['major_code'];
+        $p->remark = $data['remark'];
 
         $p->save();
 
