@@ -38,7 +38,8 @@ class PaymentFib extends Model
         'fee_late_reg',
         'currency',
         'faculty_code',
-        'major_code'
+        'major_code',
+        'remark'
     ];
 
     public static function create(array $data)
