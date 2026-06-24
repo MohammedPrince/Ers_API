@@ -785,7 +785,7 @@ class ErsMainRepository
                     // 'batch' => $studentFee['batch'],
 
                     'user_name' => $studentFee['user_name'],
-                    'date_time' => $studentFee['date_time'],
+                    'date_time' => $now,
                 ]
             );
         }
@@ -836,7 +836,7 @@ class ErsMainRepository
                     'major_code' => $studentFeeFU['major_code'],
                     'Student_Group' => $studentFeeFU['Student_Group'],
                     'user_name' => $studentFeeFU['user_name'] ?? null,
-                    'date_time' => $studentFeeFU['date_time'] ?? null,
+                    'date_time' => $now,
                 ]
             );
         }
