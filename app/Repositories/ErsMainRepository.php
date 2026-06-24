@@ -87,25 +87,29 @@ class ErsMainRepository
         $stud_id = trim($data['stud_id']);
         $start_date = null;
         $start_date_admission = null;
+        $total_bank_fee_admission = null;
         $current_date = Carbon::now()->format('Y-m-d');
-
-        // Check if stud_id starts with XX-
-        if (preg_match('/^(\d{2})-/', $stud_id, $matches)) {
-
-            $batch = '20' . $matches[1]; // 23 -> 2023, 24 -> 2024
-
-            $start_date_admission = DB::table('admission_register_setup')->where('batch', $batch)->value('start_date');
-
-        }
 
         $student_data = StudentFib::where('student_index_no', $stud_id)->with(['registrationDetails', 'faculty', 'major'])->first();
 
         if ($student_data) {
 
+
             $start_date = $student_data->registrationDetails->start_date ?? $start_date_admission;
             $viewData = $student_data->registrationDetails->viewData ?? 0;
             $totalBankFee = $student_data->registrationDetails->total_fee_bank ?? 0;
             $offLine = $student_data->registrationDetails->viewData ?? 0;
+
+            // Check if stud_id starts with XX-
+            if (preg_match('/^(\d{2})-/', $stud_id, $matches)) {
+                $batch = '20' . $matches[1]; // 23 -> 2023, 24 -> 2024
+
+                $start_date = DB::table('admission_register_setup')->where('batch', $batch)->value('start_date');
+                $totalBankFee = $student_data->total_fee;
+                $viewData = 1;
+                $offLine = 1;
+
+            }
 
             $studentData = [
                 'student_index_no' => $student_data->student_index_no,
@@ -117,14 +121,6 @@ class ErsMainRepository
                 'semester' => $student_data->semester,
                 'total_fee' => $totalBankFee,
             ];
-
-            if ($viewData == 0) {
-                return ['success' => false, 'code' => 400, 'message' => 'Flag Error-V: ' . $viewData];
-            }
-
-            if ($totalBankFee == 0) {
-                return ['success' => false, 'code' => 400, 'message' => 'Flag Error-BF: ' . $totalBankFee];
-            }
 
             if ($offLine == 0) {
                 return ['success' => false, 'code' => 400, 'message' => 'Student offline',];
