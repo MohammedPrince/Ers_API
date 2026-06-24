@@ -798,10 +798,13 @@ class ErsMainRepository
             DB::table('student_fee_fu')->updateOrInsert(
                 [
                     'StdIndexNo' => $studentFeeFU['StdIndexNo'],
+                    'faculty_code' => $studentFeeFU['faculty_code'],
+                    'major_code' => $studentFeeFU['major_code'],
+                    'Batch' => $studentFeeFU['Batch'],
                 ],
                 [
                     //'StdIndexNo' => $studentFeeFU['StdIndexNo'],
-                    'Batch' => $studentFeeFU['Batch'],
+                    // 'Batch' => $studentFeeFU['Batch'],
                     'AcademicYear' => $studentFeeFU['AcademicYear'],
                     'Dept' => $studentFeeFU['Dept'],
 
@@ -832,8 +835,6 @@ class ErsMainRepository
                     'StdIndexNoTemp' => $studentFeeFU['StdIndexNoTemp'],
 
                     'deleted' => $studentFeeFU['deleted'],
-                    'faculty_code' => $studentFeeFU['faculty_code'],
-                    'major_code' => $studentFeeFU['major_code'],
                     'Student_Group' => $studentFeeFU['Student_Group'],
                     'user_name' => $studentFeeFU['user_name'] ?? null,
                     'date_time' => $now,
