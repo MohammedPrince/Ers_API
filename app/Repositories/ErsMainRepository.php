@@ -95,13 +95,14 @@ class ErsMainRepository
         if ($student_data) {
 
 
-            $start_date = $student_data->registrationDetails->start_date ?? $start_date_admission;
+            $start_date = $student_data->registrationDetails->start_date;
             $viewData = $student_data->registrationDetails->viewData ?? 0;
             $totalBankFee = $student_data->registrationDetails->total_fee_bank ?? 0;
             $offLine = $student_data->registrationDetails->viewData ?? 0;
 
             // Check if stud_id starts with XX-
             if (preg_match('/^(\d{2})-/', $stud_id, $matches)) {
+
                 $batch = '20' . $matches[1]; // 23 -> 2023, 24 -> 2024
 
                 $start_date = DB::table('admission_register_setup')->where('batch', $batch)->value('start_date');
@@ -180,6 +181,15 @@ class ErsMainRepository
 
         if ($student_data) {
 
+            // Check if stud_id starts with XX-
+            if (preg_match('/^(\d{2})-/', $stud_id, $matches)) {
+                $batch = '20' . $matches[1]; // 23 -> 2023, 24 -> 2024
+                $start_date = DB::table('admission_register_setup')->where('batch', $batch)->value('start_date');
+                $totalBankFee = $student_data->total_fee;
+                $viewData = 1;
+                $offLine = 1;
+            }
+
             $start_date = $student_data->registrationDetails->start_date;
             $viewData = $student_data->registrationDetails->viewData;
 
@@ -257,6 +267,21 @@ class ErsMainRepository
                 $fibFlag = FibFlag::find($student_index_no);
 
                 if ($addPayment) {
+                    //Create row in fu_student_fee_fib_flag_local if not exist
+                    if (!$fibFlag) {
+
+                        $fibFlag = FibFlag::create([
+                            'student_index_no' => $stud_id,
+                            'update_flag' => 1,
+                            'date' => Carbon::now()->toDateString(), // 2026-06-24
+                            'total_fee_bank' => $total_fee,
+                            'viewData' => 2,
+                            'start_date' => $start_date,
+                            'end_date' => $end_date,
+                            'user_id' => 0,
+                            'del' => 0,
+                        ]);
+                    }
                     //Update fu_student_fee_fib_flag_local set viewData = 2 (means student paid).
                     $fibFlag->viewData = 2;
                     if ($fibFlag->save()) {
