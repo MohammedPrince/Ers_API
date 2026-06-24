@@ -750,12 +750,15 @@ class ErsMainRepository
         foreach ($studentFeeDetails as $studentFee) {
             DB::table('fu_student_fee_fib')->updateOrInsert(
                 [
-                    'student_fee_id' => $studentFee['student_fee_id'],
+                    'student_index_no' => $studentFee['student_index_no'],
+                    'faculty_code' => $studentFee['faculty_code'],
+                    'major_code' => $studentFee['major_code'],
+                    'batch' => $studentFee['batch'],
                 ],
                 [
                     'student_name_en' => $studentFee['student_name_en'],
                     'dept' => $studentFee['dept'],
-                    'batch' => $studentFee['batch'],
+
                     'semester' => $studentFee['semester'],
                     'academic_year' => $studentFee['academic_year'],
                     'cty_description' => $studentFee['cty_description'],
@@ -777,8 +780,10 @@ class ErsMainRepository
                     'fee_late_reg' => $studentFee['fee_late_reg'],
                     'nationality' => $studentFee['nationality'],
 
-                    'faculty_code' => $studentFee['faculty_code'],
-                    'major_code' => $studentFee['major_code'],
+                    // 'faculty_code' => $studentFee['faculty_code'],
+                    // 'major_code' => $studentFee['major_code'],
+                    // 'batch' => $studentFee['batch'],
+
                     'user_name' => $studentFee['user_name'],
                     'date_time' => $studentFee['date_time'],
                 ]
@@ -830,8 +835,8 @@ class ErsMainRepository
                     'faculty_code' => $studentFeeFU['faculty_code'],
                     'major_code' => $studentFeeFU['major_code'],
                     'Student_Group' => $studentFeeFU['Student_Group'],
-                    'user_name' => $studentFeeFU['user_name'],
-                    'date_time' => $studentFeeFU['date_time'],
+                    'user_name' => $studentFeeFU['user_name'] ?? null,
+                    'date_time' => $studentFeeFU['date_time'] ?? null,
                 ]
             );
         }
