@@ -640,19 +640,19 @@ class ErsMainRepository
 
             DB::table('fu_student_fee_fib_latest')->updateOrInsert(
                 [
-                    'student_fee_id' => $student['student_fee_id'],
-                    // 'batch' => $student['batch'],
-                    // 'semester' => $student['semester'],
-                    // 'academic_year' => $student['academic_year'],
-                    // 'faculty_code' => $student['faculty_code'],
-                    // 'major_code' => $student['major_code'],
-                ],
-                [
+                    'student_index_no' => $student['student_index_no'],
                     'batch' => $student['batch'],
                     'semester' => $student['semester'],
                     'academic_year' => $student['academic_year'],
                     'faculty_code' => $student['faculty_code'],
                     'major_code' => $student['major_code'],
+                ],
+                [
+                    // 'batch' => $student['batch'],
+                    // 'semester' => $student['semester'],
+                    // 'academic_year' => $student['academic_year'],
+                    // 'faculty_code' => $student['faculty_code'],
+                    // 'major_code' => $student['major_code'],
                     'student_name_en' => $student['student_name_en'],
                     'dept' => $student['dept'],
                     'cty_description' => $student['cty_description'],
@@ -792,13 +792,14 @@ class ErsMainRepository
         foreach ($studentFeeFUDetails as $studentFeeFU) {
             DB::table('student_fee_fu')->updateOrInsert(
                 [
-                    'StudentFeeId' => $studentFeeFU['StudentFeeId'],
+                    'StdIndexNo' => $studentFeeFU['StdIndexNo'],
                 ],
                 [
+                    //'StdIndexNo' => $studentFeeFU['StdIndexNo'],
                     'Batch' => $studentFeeFU['Batch'],
                     'AcademicYear' => $studentFeeFU['AcademicYear'],
                     'Dept' => $studentFeeFU['Dept'],
-                    'StdIndexNo' => $studentFeeFU['StdIndexNo'],
+
                     'StdNameEn' => $studentFeeFU['StdNameEn'],
                     'StdNameAr' => $studentFeeFU['StdNameAr'],
                     'CurrentSem' => $studentFeeFU['CurrentSem'],
