@@ -710,7 +710,7 @@ class ErsMainRepository
                 ],
                 [
                     'faculty_code' => $semRegistration['faculty_code'],
-                    'batch' => $semRegistration['batch'],
+                    'batch' => $semRegistration['Batch'],
                     'CurrentSem' => $semRegistration['CurrentSem'],
                     'registration_date_from' => $semRegistration['registration_date_from'],
                     'registration_date_to' => $semRegistration['registration_date_to'],
