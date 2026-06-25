@@ -7,6 +7,7 @@ use App\Http\Requests\Api\StudentInquiryRequest;
 use App\Http\Requests\Api\StudentPaymentRequest;
 use App\Services\ErsMainService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
@@ -148,14 +149,31 @@ class ApiController extends Controller
         }
     }
 
-    public function getData()
+    public function pushToLocalERS()
     {
-        $var = 'hello World from fu.edu.sd';
-        return response()->json([
-            'status' => 'success',
-            'code' => 200,
-            'message' => $var,
-        ], 200);
+        try {
+
+            $payments = DB::table('fu_student_fee_payment_fib')->where('remark', 'BOK')->get();
+            $flags = DB::table('fu_student_fee_fib_flag_local')->where('viewData', 2)->where('update_flag', 1)->get();
+            return response()->json([
+                'status' => 'success',
+                'code' => 200,
+                'message' => 'Data fetched successfully',
+                'LiveServerData' => [
+
+                    'fu_student_fee_payment_fib' => $payments,
+                    'fu_student_fee_fib_flag_local' => $flags,
+
+                ]
+            ]);
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'status' => 'error',
+                'code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function getServerAddress()

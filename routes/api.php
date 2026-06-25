@@ -14,9 +14,10 @@ use App\Http\Controllers\Api\AuthController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::get('/getData', [App\Http\Controllers\ApiController::class, 'getData'])->middleware(['api', 'JsonRes']);
+
 Route::get('/fetchData', [App\Http\Controllers\ApiController::class, 'fetchFromLive'])->middleware(['api', 'JsonRes']);
 Route::get('/fetchDataFromLocal', [ApiController::class, 'fetchDataFromLocal']);
+Route::get('/push', [App\Http\Controllers\ApiController::class, 'pushToLocalERS'])->middleware(['api', 'JsonRes']);
 //Public Routes
 Route::post('/login', [App\Http\Controllers\API\AuthController::class, 'login'])->middleware(['api', 'JsonRes']);
 
@@ -30,5 +31,5 @@ Route::group(['middleware' => ['auth:sanctum', 'JsonRes']], function () {
 });
 
 Route::get('/server-test', function () {
-     return php_sapi_name() . ' | ' . ($_SERVER['SERVER_SOFTWARE'] ?? 'Unknown');
+    return php_sapi_name() . ' | ' . ($_SERVER['SERVER_SOFTWARE'] ?? 'Unknown');
 });
