@@ -125,9 +125,7 @@ class ApiController extends Controller
         //$url = "http://196.1.204.142/ers/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
         //$url = "http://156.204.9.217/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
 
-        $url = "http://{$serverAddress}/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
-
-
+        $url = "http://{$serverAddress}/ers/api/index.php?faculty_code={$faculty_code}&major_code={$major_code}&batch={$batch}&semester={$semester}";
 
         $response = Http::get($url);
 
@@ -147,6 +145,15 @@ class ApiController extends Controller
                 'error' => $result['message'],
             ], $result['code'], );
         }
+    }
+
+    public function getServerAddress()
+    {
+        $file = storage_path('app/settings/server_ip.txt');
+        if (!file_exists($file)) {
+            return '127.0.0.1:8001';
+        }
+        return trim(file_get_contents($file));
     }
 
     public function pushToLocalERS()
@@ -175,15 +182,5 @@ class ApiController extends Controller
             ], 500);
         }
     }
-
-    public function getServerAddress()
-    {
-        $file = storage_path('app/settings/server_ip.txt');
-        if (!file_exists($file)) {
-            return '127.0.0.1:8001';
-        }
-        return trim(file_get_contents($file));
-    }
-
 }
 
