@@ -22,7 +22,7 @@ Route::get('/clear', function () {
     Artisan::call('route:clear');
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
-    return 'Caching, routes, and configuration cleared successfully GitActions.';
+    return 'Caching, routes, and configuration cleared successfully.';
 })->name('clear-all');
 
 /*
