@@ -726,7 +726,7 @@ class ErsMainRepository
 
     private function upsertSemRegistration(array $semRegistrationDetails)
     {
-        $now = now();
+        
         foreach ($semRegistrationDetails as $semRegistration) {
             DB::table('sem_registration_setup')->updateOrInsert(
                 [
