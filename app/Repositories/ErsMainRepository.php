@@ -86,6 +86,7 @@ class ErsMainRepository
         $studentData = [];
         $stud_id = trim($data['stud_id']);
         $start_date = null;
+        $end_date = null;
         $start_date_admission = null;
         $total_bank_fee_admission = null;
         $current_date = Carbon::now()->format('Y-m-d');
@@ -96,6 +97,7 @@ class ErsMainRepository
 
 
             $start_date = $student_data->registrationDetails->start_date;
+            $end_date = $student_data->registrationDetails->end_date;
             $viewData = $student_data->registrationDetails->viewData ?? 0;
             $totalBankFee = $student_data->registrationDetails->total_fee_bank ?? 0;
             $offLine = $student_data->registrationDetails->viewData ?? 0;
@@ -131,7 +133,7 @@ class ErsMainRepository
                 return ['success' => false, 'code' => 400, 'message' => 'Fees not available',];
             }
 
-            if ($current_date > $start_date) {
+            if ($current_date > $end_date) {
                 return ['success' => false, 'code' => 403, 'message' => 'Registration closed',];
             }
 
@@ -174,6 +176,7 @@ class ErsMainRepository
         $total_fee = null;
         $viewData = null;
         $start_date = null;
+        $end_date = null;
 
         $current_date = Carbon::now()->format('Y-m-d');
 
@@ -205,6 +208,7 @@ class ErsMainRepository
             $major_code = $student_data->major_code;
             $currency = $student_data->currency;
             $start_date = $student_data->registrationDetails->start_date ?? null;
+            $end_date = $student_data->registrationDetails->start_date ?? null;
             $end_date = $student_data->registrationDetails->end_date ?? null;
             $viewData = $student_data->registrationDetails->viewData ?? null;
 
@@ -221,7 +225,7 @@ class ErsMainRepository
                 return ['success' => false, 'code' => 400, 'message' => 'Amount not correct'];
             }
 
-            if ($current_date > $start_date) {
+            if ($current_date > $end_date) {
                 return ['success' => false, 'code' => 400, 'message' => 'Registration closed'];
             }
 
@@ -726,7 +730,7 @@ class ErsMainRepository
 
     private function upsertSemRegistration(array $semRegistrationDetails)
     {
-        
+
         foreach ($semRegistrationDetails as $semRegistration) {
             DB::table('sem_registration_setup')->updateOrInsert(
                 [
