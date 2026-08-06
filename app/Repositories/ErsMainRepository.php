@@ -839,7 +839,7 @@ class ErsMainRepository
                     'PayedAmount' => $studentFeeFU['PayedAmount'],
                     'InvoiceNo' => $studentFeeFU['InvoiceNo'],
                   
-                    'currency' => $studentFeeFU['currency'],
+                    'Currency' => $studentFeeFU['Currency'],
                     'RegistrationType' => $studentFeeFU['RegistrationType'],
                     'Remark' => $studentFeeFU['Remark'],
                     'Nationality' => $studentFeeFU['Nationality'],
