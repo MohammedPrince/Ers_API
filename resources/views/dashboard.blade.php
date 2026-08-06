@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>ERS:: Sync Data Integration System</title>
 
