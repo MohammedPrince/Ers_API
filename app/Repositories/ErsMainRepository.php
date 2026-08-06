@@ -95,7 +95,6 @@ class ErsMainRepository
 
         if ($student_data) {
 
-
             $start_date = $student_data->registrationDetails->start_date;
             $end_date = $student_data->registrationDetails->end_date;
             $viewData = $student_data->registrationDetails->viewData ?? 0;
@@ -754,6 +753,9 @@ class ErsMainRepository
     private function upsertLocalFlag(array $localFlagDetails)
     {
         $now = now();
+
+        dd($localFlagDetails);
+        
         foreach ($localFlagDetails as $localFlag) {
             DB::table('fu_student_fee_fib_flag_local')->updateOrInsert(
                 [
