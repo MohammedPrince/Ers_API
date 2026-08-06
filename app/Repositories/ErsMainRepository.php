@@ -386,6 +386,12 @@ class ErsMainRepository
                 $data['LocalServerData']['studentFeeDetails']
                 ?? [];
 
+            Log::info('Student Fee Count', [
+                'count' => count($studentFeeDetails),
+            ]);
+
+            dd($studentFeeDetails);
+
             $studentFeeFUDetails =
                 $data['LocalServerData']['studentFeeFUDetails']
                 ?? [];
