@@ -754,8 +754,10 @@ class ErsMainRepository
     {
         $now = now();
 
-        dd($localFlagDetails);
-        
+        Log::info('Local Flag Details', [
+            'data' => $localFlagDetails
+        ]);
+
         foreach ($localFlagDetails as $localFlag) {
             DB::table('fu_student_fee_fib_flag_local')->updateOrInsert(
                 [
