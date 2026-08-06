@@ -838,7 +838,6 @@ class ErsMainRepository
                     'TotalAmount' => $studentFeeFU['TotalAmount'],
                     'PayedAmount' => $studentFeeFU['PayedAmount'],
                     'InvoiceNo' => $studentFeeFU['InvoiceNo'],
-                    'remarks' => $studentFeeFU['remarks'],
                     'current_fee' => $studentFeeFU['current_fee'],
                     'total_fee' => $studentFeeFU['total_fee'],
 
