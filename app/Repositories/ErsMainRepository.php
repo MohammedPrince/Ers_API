@@ -392,11 +392,11 @@ class ErsMainRepository
                 ?? [];
 
 
-            // Log::info('Student Fee FU Count', [
-            //     'count' => count($studentFeeFUDetails),
-            // ]);
+            Log::info('Student Fee FU Count', [
+                'count' => count($studentFeeFUDetails),
+            ]);
 
-            // dd($studentFeeFUDetails);
+            dd($studentFeeFUDetails);
 
             Log::channel('ersLogs')->info(
                 'Synchronization Started',
