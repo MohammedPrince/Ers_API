@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>ERS:: Sync Data Integration System</title>
 
@@ -190,9 +191,9 @@
                                     <option value="">
                                         Select Major
                                     </option>
-                                    <input type="hidden" id="old_major" value="{{ old('major_code') }}">
 
                                 </select>
+                                <input type="hidden" id="old_major" value="{{ old('major_code') }}">
                             </div>
 
                             <div class="mb-3">
