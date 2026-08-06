@@ -378,6 +378,8 @@ class ErsMainRepository
                 $data['LocalServerData']['studentFlagDetails']
                 ?? [];
 
+            dd($localFlagDetails);
+
             $semRegistrationDetails =
                 $data['LocalServerData']['semesterRegisterDetails']
                 ?? [];
@@ -753,10 +755,6 @@ class ErsMainRepository
     private function upsertLocalFlag(array $localFlagDetails)
     {
         $now = now();
-
-        Log::info('Local Flag Details', [
-            'data' => $localFlagDetails
-        ]);
 
         foreach ($localFlagDetails as $localFlag) {
             DB::table('fu_student_fee_fib_flag_local')->updateOrInsert(
