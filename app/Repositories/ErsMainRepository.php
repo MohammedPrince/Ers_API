@@ -93,6 +93,10 @@ class ErsMainRepository
 
         $student_data = StudentFib::where('student_index_no', $stud_id)->with(['registrationDetails', 'faculty', 'major'])->first();
 
+        dd(
+            FibFlag::where('student_index_no', $stud_id)->get()
+        );
+
         if ($student_data) {
 
             $start_date = $student_data->registrationDetails->start_date;
