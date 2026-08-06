@@ -378,8 +378,6 @@ class ErsMainRepository
                 $data['LocalServerData']['studentFlagDetails']
                 ?? [];
 
-           dd($data['LocalServerData']);
-
             $semRegistrationDetails =
                 $data['LocalServerData']['semesterRegisterDetails']
                 ?? [];
