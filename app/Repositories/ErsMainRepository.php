@@ -386,11 +386,11 @@ class ErsMainRepository
                 $data['LocalServerData']['studentFeeDetails']
                 ?? [];
 
-            Log::info('Student Fee Count', [
-                'count' => count($studentFeeDetails),
-            ]);
+            // Log::info('Student Fee Count', [
+            //     'count' => count($studentFeeDetails),
+            // ]);
 
-            dd($studentFeeDetails);
+            //dd($studentFeeDetails);
 
             $studentFeeFUDetails =
                 $data['LocalServerData']['studentFeeFUDetails']
@@ -784,20 +784,17 @@ class ErsMainRepository
         foreach ($studentFeeDetails as $studentFee) {
             DB::table('fu_student_fee_fib')->updateOrInsert(
                 [
-                    'student_index_no' => $studentFee['student_index_no'],
-                    'faculty_code' => $studentFee['faculty_code'],
-                    'major_code' => $studentFee['major_code'],
-                    'batch' => $studentFee['batch'],
+                    'student_fee_id' => $studentFee['student_fee_id'],
                 ],
                 [
+                    'student_index_no' => $studentFee['student_index_no'],
                     'student_name_en' => $studentFee['student_name_en'],
                     'dept' => $studentFee['dept'],
-
+                    'batch' => $studentFee['batch'],
                     'semester' => $studentFee['semester'],
                     'academic_year' => $studentFee['academic_year'],
                     'cty_description' => $studentFee['cty_description'],
                     'fee_year' => $studentFee['fee_year'],
-
                     'fee_semester' => $studentFee['fee_semester'],
                     'discount' => $studentFee['discount'],
                     'remarks' => $studentFee['remarks'],
@@ -805,7 +802,6 @@ class ErsMainRepository
                     'total_fee' => $studentFee['total_fee'],
                     'currency' => $studentFee['currency'],
                     'date' => $studentFee['date'],
-
                     'fee_type' => $studentFee['fee_type'],
                     'status' => $studentFee['status'],
                     'allow_register' => $studentFee['allow_register'],
@@ -813,13 +809,11 @@ class ErsMainRepository
                     'repeater' => $studentFee['repeater'],
                     'fee_late_reg' => $studentFee['fee_late_reg'],
                     'nationality' => $studentFee['nationality'],
-
-                    // 'faculty_code' => $studentFee['faculty_code'],
-                    // 'major_code' => $studentFee['major_code'],
-                    // 'batch' => $studentFee['batch'],
-
+                    'allow_late_register' => $studentFee['allow_late_register'],
+                    'faculty_code' => $studentFee['faculty_code'],
+                    'major_code' => $studentFee['major_code'],
                     'user_name' => $studentFee['user_name'],
-                    'date_time' => $now,
+                    'date_time' => now(),
                 ]
             );
         }
