@@ -386,15 +386,17 @@ class ErsMainRepository
                 $data['LocalServerData']['studentFeeDetails']
                 ?? [];
 
-            // Log::info('Student Fee Count', [
-            //     'count' => count($studentFeeDetails),
-            // ]);
-
-            //dd($studentFeeDetails);
 
             $studentFeeFUDetails =
                 $data['LocalServerData']['studentFeeFUDetails']
                 ?? [];
+
+
+            // Log::info('Student Fee FU Count', [
+            //     'count' => count($studentFeeFUDetails),
+            // ]);
+
+            // dd($studentFeeFUDetails);
 
             Log::channel('ersLogs')->info(
                 'Synchronization Started',
@@ -627,7 +629,7 @@ class ErsMainRepository
                 'batch_control_count' => count($batchControlDetails),
                 'semester_registration_count' => count($semRegistrationDetails),
                 'local_flags_count' => count($localFlagDetails),
-                'studnet_fee' => count($studentFeeDetails),
+                'student_fee' => count($studentFeeDetails),
                 'student_fee_fu' => count($studentFeeFUDetails),
                 'LocalServerData' => $data,
             ];
@@ -825,17 +827,16 @@ class ErsMainRepository
         foreach ($studentFeeFUDetails as $studentFeeFU) {
             DB::table('student_fee_fu')->updateOrInsert(
                 [
-                    'StdIndexNo' => $studentFeeFU['StdIndexNo'],
+                    'StudentFeeId ' => $studentFeeFU['StudentFeeId '],
+                ],
+                [
                     'faculty_code' => $studentFeeFU['faculty_code'],
                     'major_code' => $studentFeeFU['major_code'],
                     'Batch' => $studentFeeFU['Batch'],
-                ],
-                [
-                    //'StdIndexNo' => $studentFeeFU['StdIndexNo'],
-                    // 'Batch' => $studentFeeFU['Batch'],
                     'AcademicYear' => $studentFeeFU['AcademicYear'],
                     'Dept' => $studentFeeFU['Dept'],
 
+                    'StdIndexNo' => $studentFeeFU['StdIndexNo'],
                     'StdNameEn' => $studentFeeFU['StdNameEn'],
                     'StdNameAr' => $studentFeeFU['StdNameAr'],
                     'CurrentSem' => $studentFeeFU['CurrentSem'],
