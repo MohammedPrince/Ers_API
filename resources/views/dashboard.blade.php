@@ -170,17 +170,14 @@
                                 </label>
 
                                 <select id="faculty" name="faculty_code" class="form-select" required>
-
-                                    <option value="">
-                                        Select Faculty
-                                    </option>
+                                    <option value="">Select Faculty</option>
 
                                     @foreach ($faculties as $faculty)
-                                        <option value="{{ $faculty->faculty_code }}">
+                                        <option value="{{ $faculty->faculty_code }}"
+                                            {{ old('faculty_code') == $faculty->faculty_code ? 'selected' : '' }}>
                                             {{ $faculty->faculty_desc_e }}
                                         </option>
                                     @endforeach
-
                                 </select>
                             </div>
 
@@ -194,6 +191,7 @@
                                     <option value="">
                                         Select Major
                                     </option>
+                                    <input type="hidden" id="old_major" value="{{ old('major_code') }}">
 
                                 </select>
                             </div>
@@ -204,17 +202,14 @@
                                 </label>
 
                                 <select name="batch" class="form-select" required>
-
-                                    <option value="">
-                                        Select Batch
-                                    </option>
+                                    <option value="">Select Batch</option>
 
                                     @foreach ($batches as $batch)
-                                        <option value="{{ $batch->batch }}">
+                                        <option value="{{ $batch->batch }}"
+                                            {{ old('batch') == $batch->batch ? 'selected' : '' }}>
                                             {{ $batch->batch }}
                                         </option>
                                     @endforeach
-
                                 </select>
                             </div>
 
@@ -224,17 +219,14 @@
                                 </label>
 
                                 <select name="semester" class="form-select" required>
-
-                                    <option value="">
-                                        Select Semester
-                                    </option>
+                                    <option value="">Select Semester</option>
 
                                     @for ($i = 1; $i <= 10; $i++)
-                                        <option value="{{ $i }}">
+                                        <option value="{{ $i }}"
+                                            {{ old('semester') == $i ? 'selected' : '' }}>
                                             {{ $i }}
                                         </option>
                                     @endfor
-
                                 </select>
                             </div>
 
@@ -259,37 +251,48 @@
 
     </div>
     <script>
-        document
-            .getElementById('faculty')
-            .addEventListener('change', function() {
+        const faculty = document.getElementById('faculty');
+        const major = document.getElementById('major');
+        const oldMajor = document.getElementById('old_major').value;
 
-                let faculty = this.value;
+        function loadMajors(facultyCode, selectedMajor = '') {
 
-                let major = document.getElementById('major');
+            if (!facultyCode) {
+                major.innerHTML = '<option value="">Select Major</option>';
+                return;
+            }
 
-                major.innerHTML =
-                    '<option value="">Loading...</option>';
+            major.innerHTML = '<option value="">Loading...</option>';
 
-                fetch('/get-majors/' + faculty)
-                    .then(response => response.json())
-                    .then(data => {
+            fetch('/get-majors/' + facultyCode)
+                .then(response => response.json())
+                .then(data => {
 
-                        major.innerHTML =
-                            '<option value="">Select Major</option>';
+                    major.innerHTML = '<option value="">Select Major</option>';
 
-                        data.forEach(function(item) {
+                    data.forEach(function(item) {
 
-                            major.innerHTML += `
-                    <option value="${item.major_code}">
-                        ${item.major_desc_e}
-                    </option>
-                `;
+                        let selected = (item.major_code == selectedMajor) ? 'selected' : '';
 
-                        });
-
+                        major.innerHTML += `
+                        <option value="${item.major_code}" ${selected}>
+                            ${item.major_desc_e}
+                        </option>
+                    `;
                     });
+                });
+        }
 
-            });
+        faculty.addEventListener('change', function() {
+            loadMajors(this.value);
+        });
+
+        // Reload majors after form submission
+        window.addEventListener('load', function() {
+            if (faculty.value) {
+                loadMajors(faculty.value, oldMajor);
+            }
+        });
     </script>
 </body>
 
