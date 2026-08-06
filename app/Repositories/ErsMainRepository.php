@@ -391,13 +391,6 @@ class ErsMainRepository
                 $data['LocalServerData']['studentFeeFUDetails']
                 ?? [];
 
-
-            // Log::info('Student Fee FU Count', [
-            //     'count' => count($data['LocalServerData']),
-            // ]);
-
-            dd($data['LocalServerData']);
-
             Log::channel('ersLogs')->info(
                 'Synchronization Started',
                 [
@@ -827,7 +820,7 @@ class ErsMainRepository
         foreach ($studentFeeFUDetails as $studentFeeFU) {
             DB::table('student_fee_fu')->updateOrInsert(
                 [
-                    'StudentFeeId ' => $studentFeeFU['StudentFeeId '],
+                    'StudentFeeId' => $studentFeeFU['StudentFeeId'],
                 ],
                 [
                     'faculty_code' => $studentFeeFU['faculty_code'],
