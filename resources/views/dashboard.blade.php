@@ -256,7 +256,7 @@
         function loadMajors(facultyCode, selectedMajor = '') {
 
             if (!facultyCode) {
-             
+                //major.innerHTML = '<option value="">Select Major</option>';
                 return;
             }
 
@@ -266,7 +266,7 @@
                 .then(response => response.json())
                 .then(data => {
 
-                    major.innerHTML = '<option value="">Select Major</option>';
+                   // major.innerHTML = '<option value="">Select Major</option>';
 
                     data.forEach(function(item) {
 
