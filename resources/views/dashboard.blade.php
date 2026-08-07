@@ -188,7 +188,9 @@
 
                                 <select id="major" name="major_code" class="form-select" required>
 
-                              
+                                    <option value="">
+                                        Select Major
+                                    </option>
 
                                 </select>
                                 <input type="hidden" id="old_major" value="{{ old('major_code') }}">
@@ -256,7 +258,7 @@
         function loadMajors(facultyCode, selectedMajor = '') {
 
             if (!facultyCode) {
-                //major.innerHTML = '<option value="">Select Major</option>';
+                major.innerHTML = '<option value="">Select Major</option>';
                 return;
             }
 
@@ -266,7 +268,7 @@
                 .then(response => response.json())
                 .then(data => {
 
-                   // major.innerHTML = '<option value="">Select Major</option>';
+                    major.innerHTML = '<option value="">Select Major</option>';
 
                     data.forEach(function(item) {
 
