@@ -99,6 +99,7 @@ class SettingsController extends Controller
 
             return redirect()
                 ->route('dashboard')
+                ->withInput()
                 ->with([
                     'sync_success' => $result['message'],
                     'students_count' => $result['students_count'] ?? 0,
@@ -116,6 +117,7 @@ class SettingsController extends Controller
 
         return redirect()
             ->route('dashboard')
+            ->withInput()
             ->with([
                 'sync_error' => $result['message'] ?? 'Synchronization failed.',
                 'failed_step' => $result['failed_step'] ?? null,
