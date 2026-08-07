@@ -188,9 +188,7 @@
 
                                 <select id="major" name="major_code" class="form-select" required>
 
-                                    <option value="">
-                                        Select Major
-                                    </option>
+                              
 
                                 </select>
                                 <input type="hidden" id="old_major" value="{{ old('major_code') }}">
