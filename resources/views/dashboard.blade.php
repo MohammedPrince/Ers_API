@@ -256,7 +256,7 @@
         function loadMajors(facultyCode, selectedMajor = '') {
 
             if (!facultyCode) {
-                major.innerHTML = '<option value="">Select Major</option>';
+             
                 return;
             }
 
