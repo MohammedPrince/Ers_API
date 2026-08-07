@@ -751,25 +751,29 @@ class ErsMainRepository
         }
     }
 
-    private function upsertLocalFlag(array $localFlagDetails)
+    private function insertLocalFlag(array $localFlagDetails)
     {
-        $now = now();
-
         foreach ($localFlagDetails as $localFlag) {
-            DB::table('fu_student_fee_fib_flag_local')->updateOrInsert(
-                [
-                    'student_index_no' => $localFlag['student_index_no'],
-                ],
-                [
-                    'update_flag' => $localFlag['update_flag'],
-                    'date' => $localFlag['date'],
-                    'total_fee_bank' => $localFlag['total_fee_bank'],
-                    'viewData' => $localFlag['viewData'],
-                    'start_date' => $localFlag['start_date'],
-                    'end_date' => $localFlag['end_date'],
-                    'user_id' => $localFlag['user_id'],
-                ]
-            );
+
+            // Check if student flag already exists
+            $exists = DB::table('fu_student_fee_fib_flag_local')->where('student_index_no', $localFlag['student_index_no'])->exists();
+
+            // If exists, don't insert
+            if ($exists) {
+                continue;
+            }
+
+            // Insert only if it doesn't exist
+            DB::table('fu_student_fee_fib_flag_local')->insert([
+                'student_index_no' => $localFlag['student_index_no'],
+                'update_flag' => $localFlag['update_flag'],
+                'date' => $localFlag['date'],
+                'total_fee_bank' => $localFlag['total_fee_bank'],
+                'viewData' => $localFlag['viewData'],
+                'start_date' => $localFlag['start_date'],
+                'end_date' => $localFlag['end_date'],
+                'user_id' => $localFlag['user_id'],
+            ]);
         }
     }
 
@@ -838,7 +842,7 @@ class ErsMainRepository
                     'TotalAmount' => $studentFeeFU['TotalAmount'],
                     'PayedAmount' => $studentFeeFU['PayedAmount'],
                     'InvoiceNo' => $studentFeeFU['InvoiceNo'],
-                  
+
                     'Currency' => $studentFeeFU['Currency'],
                     'RegistrationType' => $studentFeeFU['RegistrationType'],
                     'Remark' => $studentFeeFU['Remark'],
