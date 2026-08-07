@@ -188,9 +188,7 @@
 
                                 <select id="major" name="major_code" class="form-select" required>
 
-                                    <option value="">
-                                        Select Major
-                                    </option>
+                                    <option value="">Select Faculty First</option>
 
                                 </select>
                                 <input type="hidden" id="old_major" value="{{ old('major_code') }}">
@@ -253,45 +251,101 @@
     <script>
         const faculty = document.getElementById('faculty');
         const major = document.getElementById('major');
-        const oldMajor = document.getElementById('old_major').value;
+
+        const oldMajor = "{{ old('major_code') }}";
+
 
         function loadMajors(facultyCode, selectedMajor = '') {
 
+            // No faculty selected
             if (!facultyCode) {
-                major.innerHTML = '<option value="">Select Major</option>';
+
+                major.innerHTML =
+                    '<option value="">Select Faculty First</option>';
+
                 return;
             }
 
-            major.innerHTML = '<option value="">Loading...</option>';
 
-            fetch('/get-majors/' + facultyCode)
+            // Faculty selected → load majors
+            major.innerHTML =
+                '<option value="">Loading...</option>';
+
+
+            fetch("{{ url('/get-majors') }}/" + facultyCode)
                 .then(response => response.json())
                 .then(data => {
 
-                    major.innerHTML = '<option value="">Select Major</option>';
+                    // Clear everything
+                    major.innerHTML = '';
+
 
                     data.forEach(function(item) {
 
-                        let selected = (item.major_code == selectedMajor) ? 'selected' : '';
+                        const option =
+                            document.createElement('option');
 
-                        major.innerHTML += `
-                        <option value="${item.major_code}" ${selected}>
-                            ${item.major_desc_e}
-                        </option>
-                    `;
+                        option.value = item.major_code;
+
+                        option.textContent =
+                            item.major_desc_e;
+
+
+                        // Restore previously selected major
+                        if (
+                            String(item.major_code) ===
+                            String(selectedMajor)
+                        ) {
+                            option.selected = true;
+                        }
+
+
+                        major.appendChild(option);
                     });
+
+
+                    // If there is only one major,
+                    // select it automatically
+                    if (data.length === 1) {
+
+                        major.value =
+                            data[0].major_code;
+                    }
+
+                })
+                .catch(error => {
+
+                    console.error(
+                        'Error loading majors:',
+                        error
+                    );
+
+                    major.innerHTML =
+                        '<option value="">Failed to load majors</option>';
                 });
         }
 
+
+        // Faculty changed
         faculty.addEventListener('change', function() {
+
             loadMajors(this.value);
+
         });
 
-        // Reload majors after form submission
-        window.addEventListener('load', function() {
+
+        // Restore values after submit
+        document.addEventListener('DOMContentLoaded', function() {
+
             if (faculty.value) {
-                loadMajors(faculty.value, oldMajor);
+
+                loadMajors(
+                    faculty.value,
+                    oldMajor
+                );
+
             }
+
         });
     </script>
 </body>
