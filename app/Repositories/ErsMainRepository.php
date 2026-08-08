@@ -119,9 +119,12 @@ class ErsMainRepository
             //$totalBankFee = $student_data->total_fee ?? 0;
             $offLine = $student_data->registrationDetails->viewData ?? 0;
 
-
             //total fees Check
-            if ($totalBankFee != $student_data->total_fee) {
+            $totalBankFeeCheck = (float) ($student_data->registrationDetails->total_fee_bank ?? 0);
+            $totalStudentFeeCheck = (float) ($student_data->total_fee ?? 0);
+
+            if ($totalBankFeeCheck != $totalStudentFeeCheck) {
+
                 return [
                     'success' => false,
                     'code' => 400,
@@ -140,8 +143,6 @@ class ErsMainRepository
                 $offLine = 1;
 
             }
-
-
 
             $studentData = [
                 'student_index_no' => $student_data->student_index_no,
