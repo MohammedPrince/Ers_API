@@ -773,6 +773,7 @@ class ErsMainRepository
                 'start_date' => $localFlag['start_date'],
                 'end_date' => $localFlag['end_date'],
                 'user_id' => $localFlag['user_id'],
+                'del' => 0,
             ]);
         }
     }
