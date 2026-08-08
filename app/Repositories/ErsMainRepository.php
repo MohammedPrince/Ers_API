@@ -110,17 +110,15 @@ class ErsMainRepository
             ];
         }
 
-
         // Total fees check
         if ($student_data->total_fee != $student_data->registrationDetails->total_fee_bank) {
 
             return [
                 'success' => false,
                 'code' => 400,
-                'message' => 'Fees not available, Check with the faculty.',
+                'message' => 'Fee information is incorrect. Check with the faculty',
             ];
         }
-
 
         if ($student_data) {
 
@@ -128,7 +126,6 @@ class ErsMainRepository
             $end_date = $student_data->registrationDetails->end_date;
             $viewData = $student_data->registrationDetails->viewData ?? 0;
             $totalBankFee = $student_data->registrationDetails->total_fee_bank ?? 0;
-            //$totalBankFee = $student_data->total_fee ?? 0;
             $offLine = $student_data->registrationDetails->viewData ?? 0;
 
             // Check if stud_id starts with XX-
