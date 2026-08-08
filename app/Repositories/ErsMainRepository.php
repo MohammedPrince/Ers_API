@@ -115,8 +115,8 @@ class ErsMainRepository
             $start_date = $student_data->registrationDetails->start_date;
             $end_date = $student_data->registrationDetails->end_date;
             $viewData = $student_data->registrationDetails->viewData ?? 0;
-            // $totalBankFee = $student_data->registrationDetails->total_fee_bank ?? 0;
-            $totalBankFee = $student_data->total_fee ?? 0;
+            $totalBankFee = $student_data->registrationDetails->total_fee_bank ?? 0;
+            //$totalBankFee = $student_data->total_fee ?? 0;
             $offLine = $student_data->registrationDetails->viewData ?? 0;
 
             // Check if stud_id starts with XX-
@@ -129,6 +129,15 @@ class ErsMainRepository
                 $viewData = 1;
                 $offLine = 1;
 
+            }
+
+            //total fees Check
+            if ($totalBankFee != $student_data->total_fee) {
+                return [
+                    'success' => false,
+                    'code' => 400,
+                    'message' => 'Fees not available, Check with the faculty.',
+                ];
             }
 
             $studentData = [
