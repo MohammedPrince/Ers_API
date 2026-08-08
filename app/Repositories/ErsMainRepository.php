@@ -93,6 +93,22 @@ class ErsMainRepository
 
         $student_data = StudentFib::where('student_index_no', $stud_id)->with(['registrationDetails', 'faculty', 'major'])->first();
 
+        if (!$student_data) {
+            return [
+                'success' => false,
+                'code' => 400,
+                'message' => 'Student not found.',
+            ];
+        }
+
+        if (!$student_data->registrationDetails) {
+            return [
+                'success' => false,
+                'code' => 400,
+                'message' => 'Registration details not found'
+            ];
+        }
+
         if ($student_data) {
 
             $start_date = $student_data->registrationDetails->start_date;
