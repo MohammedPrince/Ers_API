@@ -731,6 +731,7 @@ class ErsMainRepository
                     'user_name' => $student['user_name'] ?? null,
                     'student_del' => $student['student_del'] ?? 0,
                     'date_time' => $now,
+                    'updated_at' => $now,
                 ]
             );
         }
