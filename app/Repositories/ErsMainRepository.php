@@ -751,7 +751,7 @@ class ErsMainRepository
         }
     }
 
-    private function insertLocalFlag(array $localFlagDetails)
+    private function upsertLocalFlag(array $localFlagDetails)
     {
         foreach ($localFlagDetails as $localFlag) {
 
