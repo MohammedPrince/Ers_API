@@ -90,7 +90,7 @@ class ErsMainRepository
         $start_date_admission = null;
         $total_bank_fee_admission = null;
         $current_date = Carbon::now()->format('Y-m-d');
-        $academic_year ='2026';
+        $academic_year = '2026';
 
         $student_data = StudentFib::where('student_index_no', $stud_id)->where('academic_year', $academic_year)->with(['registrationDetails', 'faculty', 'major'])->first();
 
@@ -115,7 +115,8 @@ class ErsMainRepository
             $start_date = $student_data->registrationDetails->start_date;
             $end_date = $student_data->registrationDetails->end_date;
             $viewData = $student_data->registrationDetails->viewData ?? 0;
-            $totalBankFee = $student_data->registrationDetails->total_fee_bank ?? 0;
+            // $totalBankFee = $student_data->registrationDetails->total_fee_bank ?? 0;
+            $totalBankFee = $student_data->total_fee ?? 0;
             $offLine = $student_data->registrationDetails->viewData ?? 0;
 
             // Check if stud_id starts with XX-
@@ -769,30 +770,52 @@ class ErsMainRepository
         }
     }
 
+    // private function upsertLocalFlag(array $localFlagDetails)
+    // {
+    //     foreach ($localFlagDetails as $localFlag) {
+
+    //         // Check if student flag already exists
+    //         $exists = DB::table('fu_student_fee_fib_flag_local')->where('student_index_no', $localFlag['student_index_no'])->exists();
+
+    //         // If exists, don't insert
+    //         if ($exists) {
+    //             continue;
+    //         }
+
+    //         // Insert only if it doesn't exist
+    //         DB::table('fu_student_fee_fib_flag_local')->insert([
+    //             'student_index_no' => $localFlag['student_index_no'],
+    //             'update_flag' => $localFlag['update_flag'],
+    //             'date' => $localFlag['date'],
+    //             'total_fee_bank' => $localFlag['total_fee_bank'],
+    //             'viewData' => $localFlag['viewData'],
+    //             'start_date' => $localFlag['start_date'],
+    //             'end_date' => $localFlag['end_date'],
+    //             'user_id' => $localFlag['user_id'],
+    //             'del' => 0,
+    //         ]);
+    //     }
+    // }
+
     private function upsertLocalFlag(array $localFlagDetails)
     {
+        $now = now();
         foreach ($localFlagDetails as $localFlag) {
-
-            // Check if student flag already exists
-            $exists = DB::table('fu_student_fee_fib_flag_local')->where('student_index_no', $localFlag['student_index_no'])->exists();
-
-            // If exists, don't insert
-            if ($exists) {
-                continue;
-            }
-
-            // Insert only if it doesn't exist
-            DB::table('fu_student_fee_fib_flag_local')->insert([
-                'student_index_no' => $localFlag['student_index_no'],
-                'update_flag' => $localFlag['update_flag'],
-                'date' => $localFlag['date'],
-                'total_fee_bank' => $localFlag['total_fee_bank'],
-                'viewData' => $localFlag['viewData'],
-                'start_date' => $localFlag['start_date'],
-                'end_date' => $localFlag['end_date'],
-                'user_id' => $localFlag['user_id'],
-                'del' => 0,
-            ]);
+            DB::table('fu_student_fee_fib_flag_local')->updateOrInsert(
+                [
+                    'student_index_no' => $localFlag['student_index_no'],
+                ],
+                [
+                    'update_flag' => $localFlag['update_flag'],
+                    'date' => $localFlag['date'],
+                    'total_fee_bank' => $localFlag['total_fee_bank'],
+                    'viewData' => $localFlag['viewData'],
+                    'start_date' => $localFlag['start_date'],
+                    'end_date' => $localFlag['end_date'],
+                    'user_id' => $localFlag['user_id'],
+                    'del' => 0,
+                ]
+            );
         }
     }
 
