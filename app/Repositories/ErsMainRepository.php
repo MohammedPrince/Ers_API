@@ -119,6 +119,16 @@ class ErsMainRepository
             //$totalBankFee = $student_data->total_fee ?? 0;
             $offLine = $student_data->registrationDetails->viewData ?? 0;
 
+
+            //total fees Check
+            if ($totalBankFee != $student_data->total_fee) {
+                return [
+                    'success' => false,
+                    'code' => 400,
+                    'message' => 'Fees not available, Check with the faculty.',
+                ];
+            }
+
             // Check if stud_id starts with XX-
             if (preg_match('/^(\d{2})-/', $stud_id, $matches)) {
 
@@ -131,14 +141,7 @@ class ErsMainRepository
 
             }
 
-            //total fees Check
-            if ($totalBankFee != $student_data->total_fee) {
-                return [
-                    'success' => false,
-                    'code' => 400,
-                    'message' => 'Fees not available, Check with the faculty.',
-                ];
-            }
+
 
             $studentData = [
                 'student_index_no' => $student_data->student_index_no,
