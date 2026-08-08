@@ -90,8 +90,9 @@ class ErsMainRepository
         $start_date_admission = null;
         $total_bank_fee_admission = null;
         $current_date = Carbon::now()->format('Y-m-d');
+        $academic_year ='2026';
 
-        $student_data = StudentFib::where('student_index_no', $stud_id)->with(['registrationDetails', 'faculty', 'major'])->first();
+        $student_data = StudentFib::where('student_index_no', $stud_id)->where('academic_year', $academic_year)->with(['registrationDetails', 'faculty', 'major'])->first();
 
         if (!$student_data) {
             return [
@@ -192,10 +193,11 @@ class ErsMainRepository
         $viewData = null;
         $start_date = null;
         $end_date = null;
+        $academic_year = '2026';
 
         $current_date = Carbon::now()->format('Y-m-d');
 
-        $student_data = StudentFib::where('student_index_no', $stud_id)->with(['registrationDetails', 'faculty', 'major'])->first();
+        $student_data = StudentFib::where('student_index_no', $stud_id)->where('academic_year', $academic_year)->with(['registrationDetails', 'faculty', 'major'])->first();
 
         if ($student_data) {
 
