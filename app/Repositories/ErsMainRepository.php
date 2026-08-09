@@ -419,6 +419,10 @@ class ErsMainRepository
                 $data['LocalServerData']['studentFeeFUDetails']
                 ?? [];
 
+            $studentDiscountDetails =
+                $data['LocalServerData']['studentDiscountDetails']
+                ?? [];
+
             Log::channel('ersLogs')->info(
                 'Synchronization Started',
                 [
@@ -428,6 +432,7 @@ class ErsMainRepository
                     'local_flags' => count($localFlagDetails),
                     'student_fee' => count($studentFeeDetails),
                     'student_fee_fu' => count($studentFeeFUDetails),
+                    'student_discount' => count($studentDiscountDetails),
                 ]
             );
 
@@ -629,6 +634,41 @@ class ErsMainRepository
                 );
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | Student Discount
+            |--------------------------------------------------------------------------
+            */
+
+            if (!empty($studentDiscountDetails)) {
+
+                $currentStep = 'Student Discount';
+
+                DB::beginTransaction();
+
+                Log::channel('ersLogs')->info(
+                    'Student Discount Sync Started',
+                    [
+                        'count' => count($studentDiscountDetails)
+                    ]
+                );
+
+
+                $this->upsertStudentDiscountDetails(
+                    $studentDiscountDetails
+                );
+
+                DB::commit();
+
+                Log::channel('ersLogs')->info(
+                    'Student Discount Sync Completed',
+                    [
+                        'count' => count($studentDiscountDetails)
+                    ]
+                );
+            }
+
+
             $duration = round(
                 microtime(true) - $startTime,
                 2
@@ -652,6 +692,7 @@ class ErsMainRepository
                 'local_flags_count' => count($localFlagDetails),
                 'student_fee' => count($studentFeeDetails),
                 'student_fee_fu' => count($studentFeeFUDetails),
+                'discounts_count' => count($studentDiscountDetails),
                 'LocalServerData' => $data,
             ];
 
@@ -913,6 +954,33 @@ class ErsMainRepository
                     'Student_Group' => $studentFeeFU['Student_Group'],
                     'user_name' => $studentFeeFU['user_name'] ?? null,
                     'date_time' => $now,
+                ]
+            );
+        }
+    }
+
+
+    private function upsertStudentDiscountDetails(array $studentDiscountDetails)
+    {
+        $now = now();
+        foreach ($studentDiscountDetails as $studentDiscount) {
+            DB::table('student_fee_discount')->updateOrInsert(
+                [
+                    'fee_discount_id' => $studentDiscount['fee_discount_id'],
+                ],
+                [
+                    'student_index_no' => $studentDiscount['student_index_no'],
+                    'dept_code' => $studentDiscount['dept_code'],
+                    'batch' => $studentDiscount['batch'],
+                    'academic_year' => $studentDiscount['academic_year'],
+                    'semester' => $studentDiscount['semester'],
+                    'discount_per' => $studentDiscount['discount_per'],
+                    'remarks' => $studentDiscount['remarks'],
+                    'created_by' => $studentDiscount['created_by'],
+                    'creation_date' => $studentDiscount['creation_date'],
+                    'last_update_date' => $studentDiscount['last_update_date'],
+                    'faculty_code' => $studentDiscount['faculty_code'],
+                    'major_code' => $studentDiscount['major_code'],
                 ]
             );
         }
