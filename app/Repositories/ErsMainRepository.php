@@ -978,7 +978,7 @@ class ErsMainRepository
                     'remarks' => $studentDiscount['remarks'],
                     'created_by' => $studentDiscount['created_by'],
                     'creation_date' => $studentDiscount['creation_date'],
-                    'last_update_date' => $studentDiscount['last_update_date'],
+                    'last_update_date' => $now->format('Y-m-d'),
                     'faculty_code' => $studentDiscount['faculty_code'],
                     'major_code' => $studentDiscount['major_code'],
                 ]
