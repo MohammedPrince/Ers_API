@@ -159,7 +159,7 @@
                     <div class="card-body p-4">
 
                         <h3 class="page-title mb-4">
-                            Sync Data
+                            Manually Sync
                         </h3>
 
                         @if (session('success'))
