@@ -54,7 +54,7 @@ class SettingsController extends Controller
         if (!File::exists($logFile)) {
             return [
                 'available' => false,
-                'log' => 'No synchronization log found for today.'
+                'log' => 'No AUTO ERS synchronization log found for today.'
             ];
         }
 
@@ -84,7 +84,7 @@ class SettingsController extends Controller
         if ($endIndex === null) {
             return [
                 'available' => false,
-                'log' => 'No completed synchronization found today.'
+                'log' => 'No completed AUTO ERS synchronization found today.'
             ];
         }
 
@@ -96,7 +96,7 @@ class SettingsController extends Controller
             if (
                 str_contains(
                     $lines[$i],
-                    'Synchronization Started'
+                    'AUTO ERS Synchronization Started'
                 )
             ) {
                 $startIndex = $i;
@@ -166,7 +166,7 @@ class SettingsController extends Controller
 
         $response = Http::get($url);
 
-        $this->ersMainService->writeLog('Synchronization Started');
+        $this->ersMainService->writeLog('AUTO Synchronization Started');
 
         $result = $this->ersMainService->saveLocalServerData($response);
 
