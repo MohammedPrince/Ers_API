@@ -34,7 +34,7 @@ class SyncERS extends Command
     public function handle()
     {
         $this->info('========================================');
-        $this->info('ERS Synchronization Started');
+        $this->info('AUTO ERS Synchronization Started');
         $this->info('Time: ' . now());
         $this->info('========================================');
 
@@ -44,7 +44,7 @@ class SyncERS extends Command
             $this->error("Sync file not found: {$file}");
 
             $this->ersMainService->writeLog(
-                "ERS Sync failed: sync file not found - {$file}"
+                "AUTO ERS Sync failed: sync file not found - {$file}"
             );
 
             return Command::FAILURE;
@@ -136,7 +136,7 @@ class SyncERS extends Command
                 ]);
 
                 $this->ersMainService->writeLog(
-                    "Synchronization Started: Faculty={$faculty_code}, " .
+                    "Auto Synchronization Started: Faculty={$faculty_code}, " .
                     "Major={$major_code}, Batch={$batch}, Semester={$semester}"
                 );
 
@@ -151,7 +151,7 @@ class SyncERS extends Command
                     );
 
                     $this->ersMainService->writeLog(
-                        "Synchronization FAILED: HTTP {$response->status()} - {$line}"
+                        "Auto Synchronization FAILED: HTTP {$response->status()} - {$line}"
                     );
 
                     // Continue with next configuration
@@ -166,7 +166,7 @@ class SyncERS extends Command
 
                     $this->info(
                         "SUCCESS: " .
-                        ($result['message'] ?? 'Synchronization completed.')
+                        ($result['message'] ?? 'Auto Synchronization completed.')
                     );
 
                     $this->info(
@@ -175,7 +175,7 @@ class SyncERS extends Command
                     );
 
                     $this->ersMainService->writeLog(
-                        "Synchronization SUCCESS: Faculty={$faculty_code}, " .
+                        "Auto Synchronization SUCCESS : Faculty={$faculty_code}, " .
                         "Major={$major_code}, Batch={$batch}, Semester={$semester}"
                     );
 
@@ -185,11 +185,11 @@ class SyncERS extends Command
 
                     $this->error(
                         "FAILED: " .
-                        ($result['message'] ?? 'Synchronization failed.')
+                        ($result['message'] ?? 'Auto Synchronization failed.')
                     );
 
                     $this->ersMainService->writeLog(
-                        "Synchronization FAILED: Faculty={$faculty_code}, " .
+                        "Auto Synchronization FAILED: Faculty={$faculty_code}, " .
                         "Major={$major_code}, Batch={$batch}, Semester={$semester}. " .
                         ($result['message'] ?? '')
                     );
@@ -204,7 +204,7 @@ class SyncERS extends Command
                 );
 
                 $this->ersMainService->writeLog(
-                    "Synchronization EXCEPTION: Faculty={$faculty_code}, " .
+                    "Auto Synchronization EXCEPTION: Faculty={$faculty_code}, " .
                     "Major={$major_code}, Batch={$batch}, Semester={$semester}. " .
                     $e->getMessage()
                 );
@@ -218,7 +218,7 @@ class SyncERS extends Command
 
         $this->info('');
         $this->info('========================================');
-        $this->info('ERS Synchronization Finished');
+        $this->info('AUTO ERS Synchronization Finished');
         $this->info('Successful: ' . $successCount);
         $this->info('Failed: ' . $failedCount);
         $this->info('Skipped: ' . $skippedCount);
@@ -226,7 +226,7 @@ class SyncERS extends Command
         $this->info('========================================');
 
         $this->ersMainService->writeLog(
-            "ERS Synchronization Finished. " .
+            "AUTO ERS Synchronization Finished. " .
             "Successful={$successCount}, " .
             "Failed={$failedCount}, " .
             "Skipped={$skippedCount}"
