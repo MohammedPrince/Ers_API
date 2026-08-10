@@ -110,6 +110,9 @@ class SettingsController extends Controller
             $endIndex - $startIndex + 1
         );
 
+        // Show latest line first
+        $lastLog = array_reverse($lastLog);
+
         return [
             'available' => true,
             'log' => implode("\n", $lastLog)
