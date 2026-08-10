@@ -125,9 +125,5 @@ class SettingsController extends Controller
             ]);
     }
 
-    public function fetchDataFromLocal(Request $request)
-    {
 
-
-    }
 }
