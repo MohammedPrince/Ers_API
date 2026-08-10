@@ -106,31 +106,27 @@
 
                         </form>
 
-                    </div>
+                        {{-- Last Synchronization --}}
 
-                </div>
+                        @if ($lastSyncLog['available'])
+                            <div class="card mt-4">
 
-                {{-- Last Synchronization --}}
+                                <div class="card-body p-4">
 
-                @if ($lastSyncLog['available'])
-                    <div class="card mt-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
 
-                        <div class="card-body p-4">
+                                        <h4 class="mb-0">
+                                            Last Synchronization
+                                        </h4>
 
-                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="badge bg-success">
+                                            Completed
+                                        </span>
 
-                                <h4 class="mb-0">
-                                    Last Synchronization
-                                </h4>
+                                    </div>
 
-                                <span class="badge bg-success">
-                                    Completed
-                                </span>
-
-                            </div>
-
-                            <pre class="bg-dark text-light p-3 rounded"
-                                style="
+                                    <pre class="bg-dark text-light p-3 rounded"
+                                        style="
                     max-height: 350px;
                     overflow-y: auto;
                     font-size: 13px;
@@ -138,14 +134,20 @@
                     word-break: break-word;
                 ">{{ $lastSyncLog['log'] }}</pre>
 
-                        </div>
+                                </div>
+
+                            </div>
+                        @else
+                            <div class="alert alert-secondary mt-4">
+                                {{ $lastSyncLog['log'] }}
+                            </div>
+                        @endif
 
                     </div>
-                @else
-                    <div class="alert alert-secondary mt-4">
-                        {{ $lastSyncLog['log'] }}
-                    </div>
-                @endif
+
+                </div>
+
+
 
             </div>
 

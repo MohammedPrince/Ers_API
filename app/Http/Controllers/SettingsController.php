@@ -47,7 +47,7 @@ class SettingsController extends Controller
 
     public function getLastSyncLog()
     {
-        $logFile = storage_path('logs/ers_sync.txt');
+        $logFile = storage_path('logs/ersLogs-2026-08-10.log');
 
         if (!File::exists($logFile)) {
             return [
