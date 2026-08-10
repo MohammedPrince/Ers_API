@@ -47,39 +47,35 @@ class SettingsController extends Controller
 
     public function getLastSyncLog()
     {
-        $logFile = storage_path('logs/ersLogs-2026-08-10.log');
+        $logFile = storage_path(
+            'logs/ersLogs-' . now()->format('Y-m-d') . '.log'
+        );
 
         if (!File::exists($logFile)) {
             return [
                 'available' => false,
-                'log' => 'No synchronization log found.'
+                'log' => 'No synchronization log found for today.'
             ];
         }
 
         $content = File::get($logFile);
 
-        // Split log into lines
-        $lines = preg_split('/\r\n|\r|\n/', trim($content));
-
-        /*
-        |--------------------------------------------------------------------------
-        | Find the last synchronization block
-        |--------------------------------------------------------------------------
-        |
-        | A synchronization starts with:
-        | Synchronization Started
-        |
-        | and ends with:
-        | AUTO ERS Synchronization Finished
-        |
-        */
+        $lines = preg_split(
+            '/\r\n|\r|\n/',
+            trim($content)
+        );
 
         $endIndex = null;
 
-        // Find the LAST "AUTO ERS Synchronization Finished"
+        // Find the LAST completed synchronization
         for ($i = count($lines) - 1; $i >= 0; $i--) {
 
-            if (str_contains($lines[$i], 'AUTO ERS Synchronization Finished')) {
+            if (
+                str_contains(
+                    $lines[$i],
+                    'AUTO ERS Synchronization Finished'
+                )
+            ) {
                 $endIndex = $i;
                 break;
             }
@@ -88,22 +84,26 @@ class SettingsController extends Controller
         if ($endIndex === null) {
             return [
                 'available' => false,
-                'log' => 'No completed synchronization found.'
+                'log' => 'No completed synchronization found today.'
             ];
         }
 
-        // Find the corresponding "Synchronization Started"
+        // Find its starting line
         $startIndex = 0;
 
         for ($i = $endIndex; $i >= 0; $i--) {
 
-            if (str_contains($lines[$i], 'Synchronization Started')) {
+            if (
+                str_contains(
+                    $lines[$i],
+                    'Synchronization Started'
+                )
+            ) {
                 $startIndex = $i;
                 break;
             }
         }
 
-        // Get only the latest synchronization
         $lastLog = array_slice(
             $lines,
             $startIndex,
