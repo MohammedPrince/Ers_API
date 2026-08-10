@@ -10,6 +10,7 @@ use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use App\Services\ErsMainService;
+use Illuminate\Support\Facades\File;
 
 
 class SettingsController extends Controller
@@ -25,6 +26,8 @@ class SettingsController extends Controller
     public function index()
     {
         $apiController = new ApiController();
+        $lastSyncLog = $this->getLastSyncLog();
+
 
         $faculties = Faculty::where('deleted', 0)->orderBy('faculty_code')->get();
 
@@ -38,7 +41,79 @@ class SettingsController extends Controller
             'ip' => $apiController->getServerAddress(),
             'faculties' => $faculties,
             'batches' => $batches,
+            'lastSyncLog' => $lastSyncLog
         ]);
+    }
+
+    public function getLastSyncLog()
+    {
+        $logFile = storage_path('logs/ers_sync.txt');
+
+        if (!File::exists($logFile)) {
+            return [
+                'available' => false,
+                'log' => 'No synchronization log found.'
+            ];
+        }
+
+        $content = File::get($logFile);
+
+        // Split log into lines
+        $lines = preg_split('/\r\n|\r|\n/', trim($content));
+
+        /*
+        |--------------------------------------------------------------------------
+        | Find the last synchronization block
+        |--------------------------------------------------------------------------
+        |
+        | A synchronization starts with:
+        | Synchronization Started
+        |
+        | and ends with:
+        | AUTO ERS Synchronization Finished
+        |
+        */
+
+        $endIndex = null;
+
+        // Find the LAST "AUTO ERS Synchronization Finished"
+        for ($i = count($lines) - 1; $i >= 0; $i--) {
+
+            if (str_contains($lines[$i], 'AUTO ERS Synchronization Finished')) {
+                $endIndex = $i;
+                break;
+            }
+        }
+
+        if ($endIndex === null) {
+            return [
+                'available' => false,
+                'log' => 'No completed synchronization found.'
+            ];
+        }
+
+        // Find the corresponding "Synchronization Started"
+        $startIndex = 0;
+
+        for ($i = $endIndex; $i >= 0; $i--) {
+
+            if (str_contains($lines[$i], 'Synchronization Started')) {
+                $startIndex = $i;
+                break;
+            }
+        }
+
+        // Get only the latest synchronization
+        $lastLog = array_slice(
+            $lines,
+            $startIndex,
+            $endIndex - $startIndex + 1
+        );
+
+        return [
+            'available' => true,
+            'log' => implode("\n", $lastLog)
+        ];
     }
 
     public function updateIp(Request $request)

@@ -110,6 +110,43 @@
 
                 </div>
 
+                {{-- Last Synchronization --}}
+
+                @if ($lastSyncLog['available'])
+                    <div class="card mt-4">
+
+                        <div class="card-body p-4">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                                <h4 class="mb-0">
+                                    Last Synchronization
+                                </h4>
+
+                                <span class="badge bg-success">
+                                    Completed
+                                </span>
+
+                            </div>
+
+                            <pre class="bg-dark text-light p-3 rounded"
+                                style="
+                    max-height: 350px;
+                    overflow-y: auto;
+                    font-size: 13px;
+                    white-space: pre-wrap;
+                    word-break: break-word;
+                ">{{ $lastSyncLog['log'] }}</pre>
+
+                        </div>
+
+                    </div>
+                @else
+                    <div class="alert alert-secondary mt-4">
+                        {{ $lastSyncLog['log'] }}
+                    </div>
+                @endif
+
             </div>
 
             <!-- Sync Data -->
