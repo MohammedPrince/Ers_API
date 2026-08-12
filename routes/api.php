@@ -24,10 +24,35 @@ Route::post('/login', [App\Http\Controllers\API\AuthController::class, 'login'])
 //Protecting Routes
 Route::group(['middleware' => ['auth:sanctum', 'JsonRes']], function () {
 
-    Route::post('/inquiry', [App\Http\Controllers\ApiController::class, 'studentInquiry']);
-    Route::post('/payment', [App\Http\Controllers\ApiController::class, 'studentPayment']);
-    Route::post('/reconcile', [App\Http\Controllers\ApiController::class, 'reconcilePayment']);
+    // Route::post('/inquiry', [App\Http\Controllers\ApiController::class, 'studentInquiry']);
+    // Route::post('/payment', [App\Http\Controllers\ApiController::class, 'studentPayment']);
+    // Route::post('/reconcile', [App\Http\Controllers\ApiController::class, 'reconcilePayment']);
     // Route::post('/logout', [AuthController::class, 'logout']);
+
+    //Offline Routes
+    Route::post('/inquiry', function () {
+        return response()->json([
+            'success' => false,
+            'code' => 403,
+            'message' => 'Service is currently unavailable.',
+        ], 403);
+    });
+
+    Route::post('/payment', function () {
+        return response()->json([
+            'success' => false,
+            'code' => 403,
+            'message' => 'Service is currently unavailable.',
+        ], 403);
+    });
+
+    Route::post('/reconcile', function () {
+        return response()->json([
+            'success' => false,
+            'code' => 403,
+            'message' => 'Service is currently unavailable.',
+        ], 403);
+    });
 });
 
 Route::get('/server-test', function () {

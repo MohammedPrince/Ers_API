@@ -147,8 +147,6 @@
 
                 </div>
 
-
-
             </div>
 
             <!-- Sync Data -->
@@ -305,11 +303,9 @@
                 return;
             }
 
-
             // Faculty selected → load majors
             major.innerHTML =
                 '<option value="">Loading...</option>';
-
 
             fetch("{{ url('/get-majors') }}/" + facultyCode)
                 .then(response => response.json())
@@ -372,7 +368,6 @@
 
         });
 
-
         // Restore values after submit
         document.addEventListener('DOMContentLoaded', function() {
 
@@ -388,5 +383,4 @@
         });
     </script>
 </body>
-
 </html>
