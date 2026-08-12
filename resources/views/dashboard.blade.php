@@ -130,17 +130,15 @@
                                         </h5>
 
                                         @if ($ersApiStatus === 'online')
-                                            <small class="text-success">
+                                            <strong class="text-success">
                                                 APIs are currently Online
-                                            </small>
+                                            </strong>
                                         @else
-                                            <small class="text-danger">
+                                            <strong class="text-danger">
                                                 APIs are currently Offline
-                                            </small>
+                                            </strong>
                                         @endif
-
                                     </div>
-
 
                                     <form method="POST" action="{{ route('settings.api.status') }}">
                                         @csrf
