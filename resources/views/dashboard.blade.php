@@ -71,9 +71,20 @@
 
                     <div class="card-body p-4">
 
-                        <h3 class="page-title mb-4">
-                            Server Configuration
-                        </h3>
+                        @php
+                            $ersApiStatus =
+                                DB::table('system_settings')->where('key', 'api_status')->value('value') ??
+                                'offline';
+                        @endphp
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+
+                            <h3 class="page-title mb-0">
+                                Server Configuration
+                            </h3>
+
+                        </div>
+
                         @if (session('server_success'))
                             <div class="alert alert-success">
                                 {{ session('server_success') }}
@@ -105,6 +116,56 @@
                             </button>
 
                         </form>
+
+                        <div class="card mt-4 border-0 shadow-sm">
+
+                            <div class="card-body">
+
+                                <div class="d-flex justify-content-between align-items-center">
+
+                                    <div>
+
+                                        <h5 class="mb-1">
+                                            ERS API
+                                        </h5>
+
+                                        @if ($ersApiStatus === 'online')
+                                            <small class="text-success">
+                                                APIs are currently Online
+                                            </small>
+                                        @else
+                                            <small class="text-danger">
+                                                APIs are currently Offline
+                                            </small>
+                                        @endif
+
+                                    </div>
+
+
+                                    <form method="POST" action="{{ route('settings.api.status') }}">
+                                        @csrf
+
+                                        @if ($ersApiStatus === 'online')
+                                            <input type="hidden" name="status" value="offline">
+
+                                            <button type="submit" class="btn btn-danger">
+                                                Set Offline
+                                            </button>
+                                        @else
+                                            <input type="hidden" name="status" value="online">
+
+                                            <button type="submit" class="btn btn-success">
+                                                Set Online
+                                            </button>
+                                        @endif
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+
+                        </div>
 
                         {{-- Last Synchronization --}}
 
@@ -383,4 +444,5 @@
         });
     </script>
 </body>
+
 </html>

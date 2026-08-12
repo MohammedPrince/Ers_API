@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Validator;
 use App\Services\ErsMainService;
 use Illuminate\Support\Facades\File;
 
-
 class SettingsController extends Controller
 {
     protected $ersMainService;
@@ -43,6 +42,36 @@ class SettingsController extends Controller
             'batches' => $batches,
             'lastSyncLog' => $lastSyncLog
         ]);
+    }
+
+    public function apiStatus()
+    {
+        return DB::table('system_settings')
+            ->where('key', 'api_status')
+            ->value('value') ?? 'offline';
+    }
+
+    public function updateApiStatus(Request $request)
+    {
+        $status = $request->status === 'online'
+            ? 'online'
+            : 'offline';
+
+        DB::table('system_settings')->updateOrInsert(
+            ['key' => 'api_status'],
+            [
+                'value' => $status,
+                'updated_at' => now(),
+                'created_at' => now(),
+            ]
+        );
+
+        return redirect()
+            ->route('dashboard')
+            ->with(
+                'server_success',
+                'ERS API is now ' . ucfirst($status) . '.'
+            );
     }
 
     public function getLastSyncLog()

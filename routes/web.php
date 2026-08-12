@@ -61,8 +61,9 @@ Route::middleware('admin')->group(function () {
                 'major_code',
                 'major_desc_e'
             ]);
-
     });
+
+    Route::post('/settings/api-status',[SettingsController::class, 'updateApiStatus'])->name('settings.api.status');
 });
 
 
