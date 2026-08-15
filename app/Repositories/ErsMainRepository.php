@@ -75,6 +75,7 @@ class ErsMainRepository
 
     public function studentInquiry($data)
     {
+
         //View Data: 0 :: Offline Cannot pay.
         //View Data: 1 :: Online Can pay.
         //View Data: 2 :: Already Paid.
@@ -791,8 +792,18 @@ class ErsMainRepository
                     'dept_name' => $batchControl['dept_name'],
                     'batch' => $batchControl['batch'],
                     'created_by' => $batchControl['created_by'],
-                    'creation_date' => $batchControl['creation_date'],
-                    'last_update_date' => $batchControl['last_update_date'],
+                    'creation_date' => (
+                        empty($batchControl['creation_date']) ||
+                        $batchControl['creation_date'] === '0000-00-00'
+                    )
+                        ? date('Y-m-d')
+                        : date('Y-m-d', strtotime($batchControl['creation_date'])),
+                    'last_update_date' => (
+                        empty($batchControl['last_update_date']) ||
+                        $batchControl['last_update_date'] === '0000-00-00'
+                    )
+                        ? date('Y-m-d')
+                        : date('Y-m-d', strtotime($batchControl['last_update_date'])),
                 ]
             );
         }
