@@ -286,9 +286,11 @@ class SyncERS extends Command
                         |--------------------------------------------------------------------------
                         */
 
-                        $response = Http::timeout(300)
-                            ->connectTimeout(30)
-                            ->get($url);
+                        // $response = Http::timeout(300)
+                        //     ->connectTimeout(30)
+                        //     ->get($url);
+
+                        $response = Http::timeout(300)->get($url);
 
                         if (!$response->successful()) {
 
