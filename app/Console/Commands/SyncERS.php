@@ -41,6 +41,7 @@ class SyncERS extends Command
         $file = storage_path('app/ers_sync.txt');
 
         if (!file_exists($file)) {
+
             $this->error("Sync file not found: {$file}");
 
             $this->ersMainService->writeLog(
@@ -53,14 +54,24 @@ class SyncERS extends Command
         $apiController = new ApiController();
         $serverAddress = $apiController->getServerAddress();
 
-        $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $lines = file(
+            $file,
+            FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
+        );
 
         $total = count($lines);
+
         $successCount = 0;
         $failedCount = 0;
         $skippedCount = 0;
 
-        $this->info("Total configuration lines: {$total}");
+        /*
+        |--------------------------------------------------------------------------
+        | Prepare configurations
+        |--------------------------------------------------------------------------
+        */
+
+        $configurations = [];
 
         foreach ($lines as $lineNumber => $line) {
 
@@ -75,7 +86,10 @@ class SyncERS extends Command
             }
 
             // Split CSV
-            $parts = array_map('trim', explode(',', $line));
+            $parts = array_map(
+                'trim',
+                explode(',', $line)
+            );
 
             // Must have exactly 4 values
             if (count($parts) !== 4) {
@@ -100,7 +114,7 @@ class SyncERS extends Command
                 $semester
             ] = $parts;
 
-            // Validate values
+            // Validate
             if (
                 !is_numeric($faculty_code) ||
                 !is_numeric($major_code) ||
@@ -121,100 +135,311 @@ class SyncERS extends Command
                 continue;
             }
 
-            $this->info(
-                "[$lineNumber/$total] Syncing Faculty={$faculty_code}, " .
-                "Major={$major_code}, Batch={$batch}, Semester={$semester}"
+            $configurations[] = [
+                'line' => $lineNumber,
+                'faculty_code' => $faculty_code,
+                'major_code' => $major_code,
+                'batch' => $batch,
+                'semester' => $semester,
+            ];
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Group configurations by Faculty
+        |--------------------------------------------------------------------------
+        |
+        | Example:
+        |
+        | Faculty 1 -> several majors
+        | Faculty 2 -> several majors
+        | Faculty 3 -> several majors
+        |
+        */
+
+        $facultyGroups = [];
+
+        foreach ($configurations as $config) {
+
+            $faculty = $config['faculty_code'];
+
+            if (!isset($facultyGroups[$faculty])) {
+                $facultyGroups[$faculty] = [];
+            }
+
+            $facultyGroups[$faculty][] = $config;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Split into batches of 3 FACULTIES
+        |--------------------------------------------------------------------------
+        */
+
+        $facultyChunks = array_chunk(
+            $facultyGroups,
+            3,
+            true
+        );
+
+        $totalBatches = count($facultyChunks);
+
+        $this->info(
+            "Total configuration lines: {$total}"
+        );
+
+        $this->info(
+            "Unique faculties: " . count($facultyGroups)
+        );
+
+        $this->info(
+            "Total batches: {$totalBatches}"
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Process batches
+        |--------------------------------------------------------------------------
+        */
+
+        $batchNumber = 0;
+
+        foreach ($facultyChunks as $facultyBatch) {
+
+            $batchNumber++;
+
+            $facultyList = implode(
+                ', ',
+                array_keys($facultyBatch)
             );
 
-            try {
+            $this->info('');
+            $this->info('----------------------------------------');
+            $this->info(
+                "STARTING BATCH {$batchNumber}/{$totalBatches}"
+            );
+            $this->info(
+                "Faculties: {$facultyList}"
+            );
+            $this->info('----------------------------------------');
 
-                $url = "http://{$serverAddress}/ers/api/index.php?" . http_build_query([
-                    'faculty_code' => $faculty_code,
-                    'major_code'   => $major_code,
-                    'batch'        => $batch,
-                    'semester'     => $semester,
-                ]);
+            $this->ersMainService->writeLog(
+                "ERS Batch {$batchNumber}/{$totalBatches} Started. " .
+                "Faculties={$facultyList}"
+            );
 
-                $this->ersMainService->writeLog(
-                    "Auto Synchronization Started: Faculty={$faculty_code}, " .
-                    "Major={$major_code}, Batch={$batch}, Semester={$semester}"
+            /*
+            |--------------------------------------------------------------------------
+            | Process each faculty inside this batch
+            |--------------------------------------------------------------------------
+            */
+
+            foreach ($facultyBatch as $faculty_code => $facultyConfigurations) {
+
+                $this->info('');
+                $this->info(
+                    "Processing Faculty {$faculty_code}"
                 );
 
-                $response = Http::timeout(300)->get($url);
+                /*
+                |--------------------------------------------------------------------------
+                | Process all majors/configurations of this faculty
+                |--------------------------------------------------------------------------
+                */
 
-                if (!$response->successful()) {
+                foreach ($facultyConfigurations as $config) {
 
-                    $failedCount++;
-
-                    $this->error(
-                        "FAILED: HTTP {$response->status()} - {$line}"
-                    );
-
-                    $this->ersMainService->writeLog(
-                        "Auto Synchronization FAILED: HTTP {$response->status()} - {$line}"
-                    );
-
-                    // Continue with next configuration
-                    continue;
-                }
-
-                $result = $this->ersMainService->saveLocalServerData($response);
-
-                if ($result['success']) {
-
-                    $successCount++;
+                    $lineNumber = $config['line'];
+                    $major_code = $config['major_code'];
+                    $batch = $config['batch'];
+                    $semester = $config['semester'];
 
                     $this->info(
-                        "SUCCESS: " .
-                        ($result['message'] ?? 'Auto Synchronization completed.')
+                        "[Line {$lineNumber}] " .
+                        "Faculty={$faculty_code}, " .
+                        "Major={$major_code}, " .
+                        "Batch={$batch}, " .
+                        "Semester={$semester}"
                     );
 
-                    $this->info(
-                        "Students: " .
-                        ($result['students_count'] ?? 0)
-                    );
+                    try {
 
-                    $this->ersMainService->writeLog(
-                        "Auto Synchronization SUCCESS : Faculty={$faculty_code}, " .
-                        "Major={$major_code}, Batch={$batch}, Semester={$semester}"
-                    );
+                        $url = "http://{$serverAddress}/ers/api/index.php?" .
+                            http_build_query([
+                                'faculty_code' => $faculty_code,
+                                'major_code' => $major_code,
+                                'batch' => $batch,
+                                'semester' => $semester,
+                            ]);
 
-                } else {
+                        $this->ersMainService->writeLog(
+                            "Auto Synchronization Started: " .
+                            "Faculty={$faculty_code}, " .
+                            "Major={$major_code}, " .
+                            "Batch={$batch}, " .
+                            "Semester={$semester}"
+                        );
 
-                    $failedCount++;
+                        /*
+                        |--------------------------------------------------------------------------
+                        | HTTP Request
+                        |--------------------------------------------------------------------------
+                        */
 
-                    $this->error(
-                        "FAILED: " .
-                        ($result['message'] ?? 'Auto Synchronization failed.')
-                    );
+                        $response = Http::timeout(300)
+                            ->connectTimeout(30)
+                            ->get($url);
 
-                    $this->ersMainService->writeLog(
-                        "Auto Synchronization FAILED: Faculty={$faculty_code}, " .
-                        "Major={$major_code}, Batch={$batch}, Semester={$semester}. " .
-                        ($result['message'] ?? '')
-                    );
+                        if (!$response->successful()) {
+
+                            $failedCount++;
+
+                            $this->error(
+                                "FAILED: HTTP {$response->status()} - " .
+                                "Faculty={$faculty_code}, " .
+                                "Major={$major_code}, " .
+                                "Batch={$batch}, " .
+                                "Semester={$semester}"
+                            );
+
+                            $this->ersMainService->writeLog(
+                                "Auto Synchronization FAILED: " .
+                                "HTTP {$response->status()} - " .
+                                "Faculty={$faculty_code}, " .
+                                "Major={$major_code}, " .
+                                "Batch={$batch}, " .
+                                "Semester={$semester}"
+                            );
+
+                            continue;
+                        }
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Save Local Server Data
+                        |--------------------------------------------------------------------------
+                        */
+
+                        $result =
+                            $this->ersMainService
+                                ->saveLocalServerData($response);
+
+                        if ($result['success']) {
+
+                            $successCount++;
+
+                            $students =
+                                $result['students_count'] ?? 0;
+
+                            $this->info(
+                                "SUCCESS: Faculty={$faculty_code}, " .
+                                "Major={$major_code}, " .
+                                "Batch={$batch}, " .
+                                "Semester={$semester}"
+                            );
+
+                            $this->info(
+                                "Students: {$students}"
+                            );
+
+                            $this->ersMainService->writeLog(
+                                "Auto Synchronization SUCCESS: " .
+                                "Faculty={$faculty_code}, " .
+                                "Major={$major_code}, " .
+                                "Batch={$batch}, " .
+                                "Semester={$semester}"
+                            );
+
+                        } else {
+
+                            $failedCount++;
+
+                            $message =
+                                $result['message']
+                                ?? 'Auto Synchronization failed.';
+
+                            $this->error(
+                                "FAILED: {$message}"
+                            );
+
+                            $this->ersMainService->writeLog(
+                                "Auto Synchronization FAILED: " .
+                                "Faculty={$faculty_code}, " .
+                                "Major={$major_code}, " .
+                                "Batch={$batch}, " .
+                                "Semester={$semester}. " .
+                                $message
+                            );
+                        }
+
+                    } catch (\Throwable $e) {
+
+                        $failedCount++;
+
+                        $this->error(
+                            "EXCEPTION: " . $e->getMessage()
+                        );
+
+                        $this->ersMainService->writeLog(
+                            "Auto Synchronization EXCEPTION: " .
+                            "Faculty={$faculty_code}, " .
+                            "Major={$major_code}, " .
+                            "Batch={$batch}, " .
+                            "Semester={$semester}. " .
+                            $e->getMessage()
+                        );
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Continue with next configuration
+                        |--------------------------------------------------------------------------
+                        */
+
+                        continue;
+                    }
                 }
+            }
 
-            } catch (\Throwable $e) {
+            /*
+            |--------------------------------------------------------------------------
+            | Batch Finished
+            |--------------------------------------------------------------------------
+            */
 
-                $failedCount++;
+            $this->info('');
+            $this->info(
+                "BATCH {$batchNumber}/{$totalBatches} FINISHED"
+            );
 
-                $this->error(
-                    "EXCEPTION on line {$lineNumber}: " . $e->getMessage()
+            $this->ersMainService->writeLog(
+                "ERS Batch {$batchNumber}/{$totalBatches} Finished. " .
+                "Faculties={$facultyList}"
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | Optional small pause between batches
+            |--------------------------------------------------------------------------
+            |
+            | Helps reduce server/database pressure.
+            |
+            */
+
+            if ($batchNumber < $totalBatches) {
+
+                $this->info(
+                    "Waiting 10 seconds before next batch..."
                 );
 
-                $this->ersMainService->writeLog(
-                    "Auto Synchronization EXCEPTION: Faculty={$faculty_code}, " .
-                    "Major={$major_code}, Batch={$batch}, Semester={$semester}. " .
-                    $e->getMessage()
-                );
-
-                // IMPORTANT:
-                // Don't stop the whole synchronization.
-                // Continue with the next line.
-                continue;
+                sleep(10);
             }
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Final Result
+        |--------------------------------------------------------------------------
+        */
 
         $this->info('');
         $this->info('========================================');
