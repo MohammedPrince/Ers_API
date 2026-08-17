@@ -430,10 +430,10 @@ class SyncERS extends Command
             if ($batchNumber < $totalBatches) {
 
                 $this->info(
-                    "Waiting 10 seconds before next batch..."
+                    "Waiting 60 seconds before next batch..."
                 );
 
-                sleep(10);
+                sleep(60);
             }
         }
 
