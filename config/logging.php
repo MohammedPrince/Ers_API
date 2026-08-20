@@ -119,6 +119,7 @@ return [
             'path' => storage_path('logs/ersLogs.log'),
             'level' => 'debug',
             'days' => 30,
+            'permission' => 0755,
         ],
     ],
 

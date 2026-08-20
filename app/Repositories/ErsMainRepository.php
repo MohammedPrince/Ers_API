@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\BankUser;
+use App\Models\CertificatePayment;
 use App\Models\ERSUser;
 use App\Models\FibFlag;
 use App\Models\PaymentFib;
@@ -92,6 +93,45 @@ class ErsMainRepository
         $total_bank_fee_admission = null;
         $current_date = Carbon::now()->format('Y-m-d');
         $academic_year = '2026';
+
+        //Certificate Payment: Check and fetch student data from certificates_payments table if stud_id starts with 6 or contains 6.
+        /*
+        if (str_contains($stud_id, '6') || str_starts_with($stud_id, '6')) {
+
+            $student_data_CERT = CertificatePayment::where('bill_id', $stud_id)->with(['studentsDetails'])->first();
+
+            if (!$student_data_CERT) {
+                return [
+                    'success' => false,
+                    'code' => 400,
+                    'message' => 'Student not found.',
+                ];
+            }
+            if ($student_data_CERT) {
+
+                if ($current_date > $student_data_CERT->due_date) {
+                    return ['success' => false, 'code' => 403, 'message' => 'Registration closed',];
+                }
+
+                if ($student_data_CERT->total_amount == 0) {
+                    return ['success' => false, 'code' => 400, 'message' => 'Fees not available',];
+                }
+
+                $studentData = [
+                    'student_index_no' => $student_data_CERT->student_index_no,
+                    'student_name' => trim($student_data_CERT->studentsDetails->student_name_en),
+                    'faculty' => $student_data_CERT->studentsDetails->faculty->faculty_desc_e,
+                    'major' => trim($student_data_CERT->studentsDetails->major->major_desc_e),
+                    'dept' => trim($student_data_CERT->studentsDetails->dept),
+                    'batch' => trim($student_data_CERT->batch),
+                    'semester' => $student_data_CERT->semester,
+                    'total_fee' => $student_data_CERT->total_amount,
+                ];
+
+                return ['success' => true, 'code' => 200, 'message' => 'Student data successfully fetched', 'studentData' => $studentData,];
+            }
+        } 
+        */
 
         $student_data = StudentFib::where('student_index_no', $stud_id)->where('academic_year', $academic_year)->with(['registrationDetails', 'faculty', 'major'])->first();
 
