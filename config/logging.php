@@ -118,8 +118,7 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/ersLogs.log'),
             'level' => 'debug',
-            'days' => 30,
-            'permission' => 0755,
+            'days' => 14,
         ],
     ],
 
