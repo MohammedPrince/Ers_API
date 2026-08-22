@@ -880,7 +880,7 @@ class ErsMainRepository
                     'ip_address' => $certificatePayment['ip_address'],
                     'created_by' => $certificatePayment['created_by'],
                     'created_at' => $certificatePayment['created_at'],
-                    'updated_at' => $certificatePayment['updated_at'],
+                    // 'updated_at' => $certificatePayment['updated_at'],
                 ]
             );
         }
