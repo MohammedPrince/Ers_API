@@ -95,7 +95,7 @@ class ErsMainRepository
         $academic_year = '2026';
 
         //Certificate Payment: Check and fetch student data from certificates_payments table if stud_id starts with 6 or contains 6.
-        /*
+
         if (str_contains($stud_id, '6') || str_starts_with($stud_id, '6')) {
 
             $student_data_CERT = CertificatePayment::where('bill_id', $stud_id)->with(['studentsDetails'])->first();
@@ -130,8 +130,9 @@ class ErsMainRepository
 
                 return ['success' => true, 'code' => 200, 'message' => 'Student data successfully fetched', 'studentData' => $studentData,];
             }
-        } 
-        */
+        }
+
+
 
         $student_data = StudentFib::where('student_index_no', $stud_id)->where('academic_year', $academic_year)->with(['registrationDetails', 'faculty', 'major'])->first();
 
@@ -247,6 +248,58 @@ class ErsMainRepository
         $academic_year = '2026';
 
         $current_date = Carbon::now()->format('Y-m-d');
+
+        //Certificate Payment: Check and fetch student data from certificates_payments table if stud_id starts with 6 or contains 6.
+
+        if (str_contains($stud_id, '6') || str_starts_with($stud_id, '6')) {
+
+            $student_data_CERT = CertificatePayment::where('bill_id', $stud_id)->with(['studentsDetails'])->first();
+
+            if (!$student_data_CERT) {
+                return [
+                    'success' => false,
+                    'code' => 400,
+                    'message' => 'Student not found.',
+                ];
+            }
+
+            if ($student_data_CERT) {
+
+                if ($current_date > $student_data_CERT->due_date) {
+                    return ['success' => false, 'code' => 403, 'message' => 'Registration closed',];
+                }
+
+                if ($student_data_CERT->total_amount == 0) {
+                    return ['success' => false, 'code' => 400, 'message' => 'Fees not available',];
+                }
+
+                if ($student_data_CERT->total_amount != $amount) {
+                    return ['success' => false, 'code' => 400, 'message' => 'Amount not correct'];
+                }
+
+                if ($current_date > $date) {
+                    return ['success' => false, 'code' => 400, 'message' => 'Invalid Date'];
+                }
+
+                if ($student_data_CERT->voucher == $voucher) {
+                    return ['success' => false, 'code' => 409, 'message' => 'Student already paid'];
+                }
+
+                $certData = [
+                    'paid' => 1,
+                    'voucher' => $voucher,
+                    'transcation_no' => $transcation_no,
+                    'ip_address' => $bank_ip,
+                    'payment_date' => Carbon::parse($date)->format('Y-m-d'),
+                    'updated_at' => Carbon::now(),
+                ];
+
+                $updateCertPayment = $student_data_CERT->update($certData);
+                if ($updateCertPayment) {
+                    return ['success' => true, 'code' => 200, 'message' => 'Student payment successfully done'];
+                }
+            }
+        }
 
         $student_data = StudentFib::where('student_index_no', $stud_id)->where('academic_year', $academic_year)->with(['registrationDetails', 'faculty', 'major'])->first();
 
@@ -464,6 +517,10 @@ class ErsMainRepository
                 $data['LocalServerData']['studentDiscountDetails']
                 ?? [];
 
+            $certificatePayments =
+                $data['LocalServerData']['certificatePayments']
+                ?? [];
+
             Log::channel('ersLogs')->info(
                 'Synchronization Started',
                 [
@@ -474,8 +531,42 @@ class ErsMainRepository
                     'student_fee' => count($studentFeeDetails),
                     'student_fee_fu' => count($studentFeeFUDetails),
                     'student_discount' => count($studentDiscountDetails),
+                    'certificate_payments' => count($certificatePayments),
                 ]
             );
+
+            /*
+            |--------------------------------------------------------------------------
+            | Certificate Payments
+            |--------------------------------------------------------------------------
+            */
+
+            if (!empty($certificatePayments)) {
+
+                $currentStep = 'Certificate Payments';
+
+                DB::beginTransaction();
+
+                Log::channel('ersLogs')->info(
+                    'Certificate Payments Sync Started',
+                    [
+                        'count' => count($certificatePayments)
+                    ]
+                );
+
+                $this->upsertCertificatePayments(
+                    $certificatePayments
+                );
+
+                DB::commit();
+
+                Log::channel('ersLogs')->info(
+                    'Certificate Payments  Sync Completed',
+                    [
+                        'count' => count($certificatePayments)
+                    ]
+                );
+            }
 
             /*
             |--------------------------------------------------------------------------
@@ -734,6 +825,7 @@ class ErsMainRepository
                 'student_fee' => count($studentFeeDetails),
                 'student_fee_fu' => count($studentFeeFUDetails),
                 'discounts_count' => count($studentDiscountDetails),
+                'certificate_payments' => count($certificatePayments),
                 'LocalServerData' => $data,
             ];
 
@@ -762,6 +854,38 @@ class ErsMainRepository
         }
     }
 
+    private function upsertCertificatePayments(array $certificatePayments): void
+    {
+        $now = now();
+        foreach ($certificatePayments as $certificatePayment) {
+            DB::table('certificates_payments')->updateOrInsert(
+                [
+                    'id' => $certificatePayment['id'],
+                ],
+                [
+                    'student_index_no' => $certificatePayment['student_index_no'],
+                    'semester' => $certificatePayment['semester'],
+                    'batch' => $certificatePayment['batch'],
+                    'bill_id' => $certificatePayment['bill_id'],
+                    'ticket_number' => $certificatePayment['ticket_number'],
+                    'certificate_number' => $certificatePayment['certificate_number'],
+                    'certificate_type' => $certificatePayment['certificate_type'],
+                    'price' => $certificatePayment['price'],
+                    'total_amount' => $certificatePayment['total_amount'],
+                    'due_date' => $certificatePayment['due_date'],
+                    'paid' => $certificatePayment['paid'],
+                    'voucher' => $certificatePayment['voucher'],
+                    'transcation_no' => $certificatePayment['transcation_no'],
+                    'payment_date' => $certificatePayment['payment_date'],
+                    'ip_address' => $certificatePayment['ip_address'],
+                    'created_by' => $certificatePayment['created_by'],
+                    'created_at' => $certificatePayment['created_at'],
+                    'updated_at' => $certificatePayment['updated_at'],
+                ]
+            );
+        }
+    }
+
     private function upsertStudentFeeLatest(array $students): void
     {
         $now = now();
@@ -786,11 +910,6 @@ class ErsMainRepository
                     'major_code' => $student['major_code'],
                 ],
                 [
-                    // 'batch' => $student['batch'],
-                    // 'semester' => $student['semester'],
-                    // 'academic_year' => $student['academic_year'],
-                    // 'faculty_code' => $student['faculty_code'],
-                    // 'major_code' => $student['major_code'],
                     'student_name_en' => $student['student_name_en'],
                     'dept' => $student['dept'],
                     'cty_description' => $student['cty_description'],

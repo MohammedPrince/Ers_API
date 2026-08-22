@@ -162,6 +162,8 @@ class ApiController extends Controller
 
             $payments = DB::table('fu_student_fee_payment_fib')->where('remark', 'BOK')->get();
             $flags = DB::table('fu_student_fee_fib_flag_local')->where('viewData', 2)->where('update_flag', 1)->get();
+            $certificates_payments = DB::table('certificates_payments')->where('paid', 1)->get();
+            
             return response()->json([
                 'status' => 'success',
                 'code' => 200,
@@ -170,6 +172,7 @@ class ApiController extends Controller
 
                     'fu_student_fee_payment_fib' => $payments,
                     'fu_student_fee_fib_flag_local' => $flags,
+                    'certificates_payments' => $certificates_payments,
 
                 ]
             ]);

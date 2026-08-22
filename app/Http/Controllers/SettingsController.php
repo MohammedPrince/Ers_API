@@ -219,6 +219,7 @@ class SettingsController extends Controller
                         'Student Fee FU' => $result['student_fee_fu'] ?? 0,
                         'Local Discounts' => $result['discounts_count'] ?? 0,
                         'Local Flags' => $result['local_flags_count'] ?? 0,
+                        'Certificate Payments' => $result['certificate_payments'] ?? 0,
                     ],
                 ]);
         }
