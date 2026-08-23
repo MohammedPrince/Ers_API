@@ -856,13 +856,15 @@ class ErsMainRepository
 
     private function upsertCertificatePayments(array $certificatePayments): void
     {
-        $now = now();
         foreach ($certificatePayments as $certificatePayment) {
-            DB::table('certificates_payments')->updateOrInsert(
-                [
+
+            $exists = DB::table('certificates_payments')->where('id', $certificatePayment['id'])->exists();
+
+            if (!$exists) {
+
+                DB::table('certificates_payments')->insert([
+
                     'id' => $certificatePayment['id'],
-                ],
-                [
                     'student_index_no' => $certificatePayment['student_index_no'],
                     'semester' => $certificatePayment['semester'],
                     'batch' => $certificatePayment['batch'],
@@ -880,9 +882,9 @@ class ErsMainRepository
                     'ip_address' => $certificatePayment['ip_address'],
                     'created_by' => $certificatePayment['created_by'],
                     'created_at' => $certificatePayment['created_at'],
-                    // 'updated_at' => $certificatePayment['updated_at'],
-                ]
-            );
+                    'updated_at' => $certificatePayment['updated_at'] ?? now(),
+                ]);
+            }
         }
     }
 
