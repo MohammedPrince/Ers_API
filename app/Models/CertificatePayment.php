@@ -10,7 +10,12 @@ class CertificatePayment extends Model
     use HasFactory;
     protected $table = 'certificates_payments';
 
-      protected $fillable = [
+    protected $fillable = [
+        'student_name',
+        'courses',
+        'faculty_code',
+        'major_code',
+        'payment_type',
         'paid',
         'voucher',
         'transcation_no',
