@@ -23,6 +23,16 @@ class CertificatePayment extends Model
         'ip_address'
     ];
 
+    public function faculty()
+    {
+        return $this->belongsTo(Faculty::class, 'faculty_code', 'faculty_code');
+    }
+
+    public function major()
+    {
+        return $this->belongsTo(Major::class, 'major_code', 'major_code');
+    }
+    
     public function studentsDetails()
     {
         return $this->belongsTo(StudentFib::class, 'student_index_no', 'student_index_no');
