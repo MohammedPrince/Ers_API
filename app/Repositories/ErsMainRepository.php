@@ -96,7 +96,7 @@ class ErsMainRepository
 
         //Certificate Payment: Check and fetch student data from certificates_payments table if stud_id starts with 6 or contains 6.
 
-        if (str_contains($stud_id, '6') || str_starts_with($stud_id, '6')) {
+        if (str_starts_with($stud_id, '5') || str_starts_with($stud_id, '6')) {
 
             $student_data_CERT = CertificatePayment::where('bill_id', $stud_id)->with(['studentsDetails'])->first();
 
@@ -251,7 +251,7 @@ class ErsMainRepository
 
         //Certificate Payment: Check and fetch student data from certificates_payments table if stud_id starts with 6 or contains 6.
 
-        if (str_contains($stud_id, '6') || str_starts_with($stud_id, '6')) {
+        if (str_starts_with($stud_id, '5') || str_starts_with($stud_id, '6')) {
 
             $student_data_CERT = CertificatePayment::where('bill_id', $stud_id)->with(['studentsDetails'])->first();
 
