@@ -98,7 +98,7 @@ class ErsMainRepository
 
         if (str_starts_with($stud_id, '5') || str_starts_with($stud_id, '6')) {
 
-            $student_data_CERT = CertificatePayment::where('bill_id', $stud_id)->with(['faculty','major'])->first();
+            $student_data_CERT = CertificatePayment::where('bill_id', $stud_id)->with(['faculty', 'major'])->first();
 
             if (!$student_data_CERT) {
                 return [
@@ -119,7 +119,7 @@ class ErsMainRepository
 
                 $studentData = [
                     'student_index_no' => $student_data_CERT->student_index_no,
-                    'student_name' => trim($student_data_CERT->student_name)?? null,
+                    'student_name' => trim($student_data_CERT->student_name) ?? null,
                     'faculty' => $student_data_CERT->faculty->faculty_desc_e,
                     'major' => trim($student_data_CERT->major->major_desc_e),
                     'dept' => trim($student_data_CERT->faculty->abbreviation),
@@ -253,7 +253,7 @@ class ErsMainRepository
 
         if (str_starts_with($stud_id, '5') || str_starts_with($stud_id, '6')) {
 
-            $student_data_CERT = CertificatePayment::where('bill_id', $stud_id)->with(['faculty','major'])->first();
+            $student_data_CERT = CertificatePayment::where('bill_id', $stud_id)->with(['faculty', 'major'])->first();
 
             if (!$student_data_CERT) {
                 return [
