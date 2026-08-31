@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use App\Services\ErsMainService;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Artisan;
+
 
 class SettingsController extends Controller
 {
@@ -231,6 +233,35 @@ class SettingsController extends Controller
                 'sync_error' => $result['message'] ?? 'Synchronization failed.',
                 'failed_step' => $result['failed_step'] ?? null,
             ]);
+    }
+
+
+    public function runNow()
+    {
+        try {
+
+            $exitCode = Artisan::call('sync:ers');
+
+            $output = Artisan::output();
+
+            if ($exitCode === 0) {
+
+                return redirect()
+                    ->route('dashboard')
+                    ->with('sync_success', 'Synchronization completed successfully.');
+            }
+
+            return redirect()
+                ->route('dashboard')
+                ->with('sync_error', 'Synchronization finished with errors.')
+                ->with('sync_output', $output);
+
+        } catch (\Throwable $e) {
+
+            return redirect()
+                ->route('dashboard')
+                ->with('sync_error', 'Unable to start synchronization: ' . $e->getMessage());
+        }
     }
 
 

@@ -73,8 +73,7 @@
 
                         @php
                             $ersApiStatus =
-                                DB::table('system_settings')->where('key', 'api_status')->value('value') ??
-                                'offline';
+                                DB::table('system_settings')->where('key', 'api_status')->value('value') ?? 'offline';
                         @endphp
 
                         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -116,6 +115,8 @@
                             </button>
 
                         </form>
+
+
 
                         <div class="card mt-4 border-0 shadow-sm">
 
@@ -223,6 +224,7 @@
                             <div class="alert alert-success alert-dismissible fade show">
                                 <strong>Success!</strong>
                                 {{ session('success') }}
+
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         @endif
@@ -234,11 +236,16 @@
                                 <hr>
 
                                 <ul class="mb-0">
-                                    <li>Students: {{ session('students_count', 0) }}</li>
+                                    <li>
+                                        Students:
+                                        {{ session('students_count', 0) }}
+                                    </li>
 
                                     @if (session('sync_details'))
                                         @foreach (session('sync_details') as $name => $count)
-                                            <li>{{ $name }}: {{ $count }}</li>
+                                            <li>
+                                                {{ $name }}: {{ $count }}
+                                            </li>
                                         @endforeach
                                     @endif
                                 </ul>
@@ -247,87 +254,164 @@
 
                         @if (session('sync_error'))
                             <div class="alert alert-danger">
-                                <strong>{{ session('sync_error') }}</strong>
+
+                                <strong>
+                                    {{ session('sync_error') }}
+                                </strong>
 
                                 @if (session('failed_step'))
                                     <br>
+
                                     Failed Step:
-                                    <strong>{{ session('failed_step') }}</strong>
+                                    <strong>
+                                        {{ session('failed_step') }}
+                                    </strong>
                                 @endif
+
                             </div>
                         @endif
 
+
+                        {{-- Form Fields --}}
                         <form method="POST" action="{{ route('sync.start') }}">
                             @csrf
 
                             <div class="mb-3">
+
                                 <label class="form-label fw-bold">
                                     Faculty
                                 </label>
 
                                 <select id="faculty" name="faculty_code" class="form-select" required>
-                                    <option value="">Select Faculty</option>
+
+                                    <option value="">
+                                        Select Faculty
+                                    </option>
 
                                     @foreach ($faculties as $faculty)
                                         <option value="{{ $faculty->faculty_code }}"
                                             {{ old('faculty_code') == $faculty->faculty_code ? 'selected' : '' }}>
+
                                             {{ $faculty->faculty_desc_e }}
+
                                         </option>
                                     @endforeach
+
                                 </select>
+
                             </div>
 
+
                             <div class="mb-3">
+
                                 <label class="form-label fw-bold">
                                     Major
                                 </label>
 
                                 <select id="major" name="major_code" class="form-select" required>
 
-                                    <option value="">Select Faculty First</option>
+                                    <option value="">
+                                        Select Faculty First
+                                    </option>
 
                                 </select>
+
                                 <input type="hidden" id="old_major" value="{{ old('major_code') }}">
+
                             </div>
 
+
                             <div class="mb-3">
+
                                 <label class="form-label fw-bold">
                                     Batch
                                 </label>
 
                                 <select name="batch" class="form-select" required>
-                                    <option value="">Select Batch</option>
+
+                                    <option value="">
+                                        Select Batch
+                                    </option>
 
                                     @foreach ($batches as $batch)
                                         <option value="{{ $batch->batch }}"
                                             {{ old('batch') == $batch->batch ? 'selected' : '' }}>
+
                                             {{ $batch->batch }}
+
                                         </option>
                                     @endforeach
+
                                 </select>
+
                             </div>
 
+
                             <div class="mb-4">
+
                                 <label class="form-label fw-bold">
                                     Semester
                                 </label>
 
                                 <select name="semester" class="form-select" required>
-                                    <option value="">Select Semester</option>
+
+                                    <option value="">
+                                        Select Semester
+                                    </option>
 
                                     @for ($i = 1; $i <= 10; $i++)
                                         <option value="{{ $i }}"
                                             {{ old('semester') == $i ? 'selected' : '' }}>
+
                                             {{ $i }}
+
                                         </option>
                                     @endfor
+
                                 </select>
+
                             </div>
 
-                            <button class="btn btn-success w-100 btn-lg">
-                                Start Synchronization
-                            </button>
+
+                            {{-- Buttons --}}
+                            <div class="row g-2">
+
+                                {{-- Start Synchronization --}}
+                                <div class="col-6">
+
+                                    <button type="submit" class="btn btn-success w-100 btn-lg">
+
+                                        Start Synchronization
+
+                                    </button>
+
+                                </div>
+
+
+                                {{-- Sync Now --}}
+                                <div class="col-6">
+
+                                    <button type="button" class="btn btn-secondary w-100 btn-lg"
+                                        onclick="runSyncNow()">
+
+                                        Sync Now
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
                         </form>
+
+                        {{-- Separate form for Sync Now --}}
+                        <form id="syncNowForm" method="POST" action="{{ route('sync.run.now') }}"
+                            style="display: none;">
+
+                            @csrf
+
+                        </form>
+
                     </div>
 
                 </div>
@@ -440,6 +524,17 @@
             }
 
         });
+    </script>
+    <script>
+        function runSyncNow() {
+
+            if (!confirm('Run ERS synchronization now?')) {
+                return;
+            }
+
+            document.getElementById('syncNowForm').submit();
+
+        }
     </script>
 </body>
 

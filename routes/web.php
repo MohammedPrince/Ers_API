@@ -64,6 +64,8 @@ Route::middleware('admin')->group(function () {
     });
 
     Route::post('/settings/api-status',[SettingsController::class, 'updateApiStatus'])->name('settings.api.status');
+
+    Route::post('/sync/run-now', [SettingsController::class, 'runNow'])->name('sync.run.now');
 });
 
 
