@@ -377,7 +377,7 @@
                             <div class="row g-2">
 
                                 {{-- Start Synchronization --}}
-                                <div class="col-6">
+                                <div class="col-12">
 
                                     <button type="submit" class="btn btn-success w-100 btn-lg">
 
@@ -389,7 +389,7 @@
 
 
                                 {{-- Sync Now --}}
-                                <div class="col-6">
+                                {{-- <div class="col-6">
 
                                     <button type="button" class="btn btn-secondary w-100 btn-lg"
                                         onclick="runSyncNow()">
@@ -398,19 +398,19 @@
 
                                     </button>
 
-                                </div>
+                                </div> --}}
 
                             </div>
 
                         </form>
 
                         {{-- Separate form for Sync Now --}}
-                        <form id="syncNowForm" method="POST" action="{{ route('sync.run.now') }}"
+                        {{-- <form id="syncNowForm" method="POST" action="{{ route('sync.run.now') }}"
                             style="display: none;">
 
                             @csrf
 
-                        </form>
+                        </form> --}}
 
                     </div>
 
