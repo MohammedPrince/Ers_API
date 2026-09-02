@@ -858,9 +858,12 @@ class ErsMainRepository
     {
         foreach ($certificatePayments as $certificatePayment) {
 
-            $exists = DB::table('certificates_payments')->where('id', $certificatePayment['id'])->exists();
+            $localPayment = DB::table('certificates_payments')
+                ->where('id', $certificatePayment['id'])
+                ->first();
 
-            if (!$exists) {
+            // Not exists → INSERT
+            if (!$localPayment) {
 
                 DB::table('certificates_payments')->insert([
 
@@ -889,6 +892,19 @@ class ErsMainRepository
                     'created_at' => $certificatePayment['created_at'],
                     'updated_at' => $certificatePayment['updated_at'] ?? now(),
                 ]);
+
+            } else {
+
+                // Exists → check due_date
+                if ($localPayment->due_date != $certificatePayment['due_date']) {
+
+                    DB::table('certificates_payments')
+                        ->where('id', $certificatePayment['id'])
+                        ->update([
+                            'due_date' => $certificatePayment['due_date'],
+                            'updated_at' => now(),
+                        ]);
+                }
             }
         }
     }
