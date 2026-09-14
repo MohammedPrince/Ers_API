@@ -858,9 +858,7 @@ class ErsMainRepository
     {
         foreach ($certificatePayments as $certificatePayment) {
 
-            $localPayment = DB::table('certificates_payments')
-                ->where('id', $certificatePayment['id'])
-                ->first();
+            $localPayment = DB::table('certificates_payments')->where('bill_id', $certificatePayment['bill_id'])->first();
 
             // Not exists → INSERT
             if (!$localPayment) {
@@ -899,7 +897,7 @@ class ErsMainRepository
                 if ($localPayment->due_date != $certificatePayment['due_date']) {
 
                     DB::table('certificates_payments')
-                        ->where('id', $certificatePayment['id'])
+                        ->where('bill_id', $certificatePayment['bill_id'])
                         ->update([
                             'due_date' => $certificatePayment['due_date'],
                             'updated_at' => now(),

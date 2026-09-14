@@ -64,6 +64,7 @@ class ApiController extends Controller
             ], $result['code'], );
         }
     }
+    
     public function reconcilePayment(ReconcileRequest $request)
     {
         $data = $request->validated();
