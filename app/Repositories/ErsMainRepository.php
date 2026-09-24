@@ -856,6 +856,7 @@ class ErsMainRepository
 
     private function upsertCertificatePayments(array $certificatePayments): void
     {
+        
         foreach ($certificatePayments as $certificatePayment) {
 
             $localPayment = DB::table('certificates_payments')->where('bill_id', $certificatePayment['bill_id'])->first();
@@ -893,16 +894,32 @@ class ErsMainRepository
 
             } else {
 
-                // Exists → check due_date
-                if ($localPayment->due_date != $certificatePayment['due_date']) {
-
-                    DB::table('certificates_payments')
-                        ->where('bill_id', $certificatePayment['bill_id'])
-                        ->update([
-                            'due_date' => $certificatePayment['due_date'],
-                            'updated_at' => now(),
-                        ]);
-                }
+                // Exists → update all fields except the lookup and creation fields
+                DB::table('certificates_payments')
+                    ->where('bill_id', $certificatePayment['bill_id'])
+                    ->update([
+                        'id' => $certificatePayment['id'],
+                        'student_index_no' => $certificatePayment['student_index_no'],
+                        'student_name' => $certificatePayment['student_name'],
+                        'faculty_code' => $certificatePayment['faculty_code'],
+                        'major_code' => $certificatePayment['major_code'],
+                        'semester' => $certificatePayment['semester'],
+                        'batch' => $certificatePayment['batch'],
+                        'payment_type' => $certificatePayment['payment_type'],
+                        'ticket_number' => $certificatePayment['ticket_number'],
+                        'courses' => $certificatePayment['courses'],
+                        'certificate_number' => $certificatePayment['certificate_number'],
+                        'certificate_type' => $certificatePayment['certificate_type'],
+                        'price' => $certificatePayment['price'],
+                        'total_amount' => $certificatePayment['total_amount'],
+                        'due_date' => $certificatePayment['due_date'],
+                        'paid' => $certificatePayment['paid'],
+                        'voucher' => $certificatePayment['voucher'],
+                        'transcation_no' => $certificatePayment['transcation_no'],
+                        'payment_date' => $certificatePayment['payment_date'],
+                        'ip_address' => $certificatePayment['ip_address'],
+                        'updated_at' => now(),
+                    ]);
             }
         }
     }
