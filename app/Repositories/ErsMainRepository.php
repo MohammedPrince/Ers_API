@@ -94,6 +94,11 @@ class ErsMainRepository
         $current_date = Carbon::now()->format('Y-m-d');
         $academic_year = '2026';
 
+        // Normalize IDs like '2594578748' to '25-94578748'.
+        if (str_starts_with($stud_id, '25') && !str_contains($stud_id, '-')) {
+            $stud_id = '25-' . substr($stud_id, 2);
+        }
+
         //Certificate Payment: Check and fetch student data from certificates_payments table if stud_id starts with 6 or contains 6.
 
         if (str_starts_with($stud_id, '5') || str_starts_with($stud_id, '6')) {
@@ -131,8 +136,6 @@ class ErsMainRepository
                 return ['success' => true, 'code' => 200, 'message' => 'Student data successfully fetched', 'studentData' => $studentData,];
             }
         }
-
-
 
         $student_data = StudentFib::where('student_index_no', $stud_id)->where('academic_year', $academic_year)->with(['registrationDetails', 'faculty', 'major'])->first();
 
@@ -249,8 +252,12 @@ class ErsMainRepository
 
         $current_date = Carbon::now()->format('Y-m-d');
 
-        //Certificate Payment: Check and fetch student data from certificates_payments table if stud_id starts with 6 or contains 6.
+        // Normalize IDs like '2594578748' to '25-94578748'.
+        if (str_starts_with($stud_id, '25') && !str_contains($stud_id, '-')) {
+            $stud_id = '25-' . substr($stud_id, 2);
+        }
 
+        //Certificate Payment: Check and fetch student data from certificates_payments table if stud_id starts with 6 or contains 6.
         if (str_starts_with($stud_id, '5') || str_starts_with($stud_id, '6')) {
 
             $student_data_CERT = CertificatePayment::where('bill_id', $stud_id)->with(['faculty', 'major'])->first();
@@ -359,6 +366,9 @@ class ErsMainRepository
                 return ['success' => false, 'code' => 409, 'message' => 'Student already paid'];
             } else {
                 //Do the insert to fu_student_fee_payment_fib
+
+             
+
                 $paymentData = [
                     'student_index_no' => $student_index_no,
                     'student_name_en' => $student_name_en,
@@ -856,7 +866,7 @@ class ErsMainRepository
 
     private function upsertCertificatePayments(array $certificatePayments): void
     {
-        
+
         foreach ($certificatePayments as $certificatePayment) {
 
             $localPayment = DB::table('certificates_payments')->where('bill_id', $certificatePayment['bill_id'])->first();
